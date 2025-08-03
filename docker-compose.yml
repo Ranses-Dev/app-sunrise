@@ -1,0 +1,55 @@
+services:
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+            args:
+                PHP_VERSION: 8.4.8
+        container_name: laravel-app
+        restart: unless-stopped
+        volumes:
+            - ./:/var/www/html:cached
+            - vendor:/var/www/html/vendor
+        environment:
+            SERVICE_NAME: laravel-app
+            SERVICE_TAGS: dev
+        networks:
+            - laravel-network
+
+    nginx:
+        image: nginx:alpine
+        container_name: laravel-nginx
+        restart: unless-stopped
+        ports:
+            - "8000:80"
+        volumes:
+            - ./public:/var/www/html/public:ro
+            - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+        depends_on:
+            app:
+                condition: service_started
+        networks:
+            - laravel-network
+
+    db:
+        image: mysql:8.0
+        container_name: laravel-db
+        restart: unless-stopped
+        ports:
+            - "3306:3306" # Exposición del puerto MySQL
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: sunconnect_db
+        volumes:
+            - dbdata:/var/lib/mysql # Persistencia de datos en MySQL
+        networks:
+            - laravel-network
+
+networks:
+    laravel-network:
+        driver: bridge
+
+volumes:
+    dbdata:
+        driver: local
+    vendor:

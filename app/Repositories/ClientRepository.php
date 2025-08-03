@@ -1,0 +1,176 @@
+<?php
+
+namespace App\Repositories;
+
+use App\Models\Client;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection as CollectionData;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+
+class ClientRepository implements ClientRepositoryInterface
+{
+    public function getAll(): Collection
+    {
+        return Client::all();
+    }
+    public function findById(int $id): ?Client
+    {
+        return Client::find($id);
+    }
+    public function findBySsn(string $ssn): ?Client
+    {
+        return Client::ssn($ssn)->first();
+    }
+    public function getFiltered(string $search): Builder
+    {
+        return Client::search($search);
+    }
+    public function create(array $data): Client
+    {
+        return Client::create($data);
+    }
+    public function update(int $id, array $data): bool
+    {
+        $client = $this->findById($id);
+        if ($client) {
+            return $client->update($data);
+        }
+        return false;
+    }
+    public function delete(int $id): bool
+    {
+        $client = $this->findById($id);
+        if ($client) {
+            return $client->delete();
+        }
+        return false;
+    }
+
+    public function getImageIdentificationCardBase64(int $id): ?string
+    {
+        $client = $this->findById($id);
+        if ($client && $client->identification_picture) {
+            return   $client->getIdentificationPictureAttribute();
+        }
+        return null;
+    }
+
+    public function existsFile(int $id): bool
+    {
+        $client = $this->findById($id);
+        if ($client && $client->identification_picture) {
+            return $client->verifyFileExist();
+        }
+        return false;
+    }
+    public function downloadFile(int $id): ?StreamedResponse
+    {
+        $client = $this->findById($id);
+        if ($client) {
+            return $client->downloadFileIfExists();
+        }
+        return null;
+    }
+    public function deleteIdentificationCardFile(int $id): void
+    {
+        $client = $this->findById($id);
+        if ($client) {
+            $client->deleteFileIfExists();
+        }
+    }
+
+    public function getClientsByHealthCareProvider(): array
+    {
+        return DB::table('clients')
+            ->join('healthcare_providers', 'clients.healthcare_provider_id', '=', 'healthcare_providers.id')
+            ->select('healthcare_providers.name as provider', DB::raw('COUNT(clients.id) as total'))
+            ->groupBy('healthcare_providers.name')
+            ->orderByDesc('total')
+            ->get()
+            ->map(fn($row) => ['provider' => $row->provider, 'total' => $row->total])
+            ->toArray();
+    }
+    public function getClientsByPrograms(): array
+    {
+        return DB::table('programs')
+            ->join('contract_meals', 'contract_meals.program_id', '=', 'programs.id')
+            ->join('clients', 'contract_meals.client_id', '=', 'clients.id')
+            ->select('programs.name as program', DB::raw('COUNT(DISTINCT contract_meals.client_id) as total'))
+            ->groupBy('programs.id', 'programs.name')
+            ->orderByDesc('total')
+            ->get()
+            ->map(fn($row) => ['program' => $row->program, 'total' => $row->total])
+            ->toArray();
+    }
+    public function certificationsOverdue(?array $filters): Builder
+    {
+        return Client::recertificationsOverdue($filters);
+    }
+    public function certificationsDue(?array $filters): Builder
+    {
+        return Client::recertificationsDue($filters);
+    }
+    public function identificationsDue(?array $filters): Builder
+    {
+        return Client::identificationsDue($filters);
+    }
+    public function identificationsOverdue(?array $filters): Builder
+    {
+
+        return Client::identificationsOverdue($filters);
+    }
+    public function totalCertificationsOverdue(): int
+    {
+        return Client::recertificationsOverdueCount();
+    }
+    public function totalCertificationsDue(): int
+    {
+        return Client::recertificationsDueCount();
+    }
+    public function totalIdentificationsDue(): int
+    {
+        return Client::identificationsDueCount();
+    }
+    public function totalIdentificationsOverdue(): int
+    {
+        return Client::identificationsOverdueCount();
+    }
+    public function totalClients(): int
+    {
+        return Client::count();
+    }
+
+    public function getClientServiceSpecialistsByProgram(?int $programId): CollectionData
+    {
+        return DB::table('users')
+            ->join('program_user', 'users.id', '=', 'program_user.user_id')
+            ->join('programs', 'program_user.program_id', '=', 'programs.id')
+            ->where('programs.id', '=', $programId)
+            ->select('users.id', 'users.name')
+            ->distinct()
+            ->get();
+    }
+    public function getClientServiceSpecialistsByProgramBranch(?int $programBranchId): CollectionData
+    {
+        return DB::table('users')
+            ->join('program_user', 'users.id', '=', 'program_user.user_id')
+            ->join('programs', 'program_user.program_id', '=', 'programs.id')
+            ->join('program_branches', 'programs.id', '=', 'program_branches.program_id')
+            ->where('program_branches.id', '=', $programBranchId)
+            ->select('users.id', 'users.name')
+            ->distinct()
+            ->get();
+    }
+    public function validateUniqueSSN(string $ssn,  ?int $id = null): bool
+    {
+        $hash = hash('sha256', $ssn);
+        $query = Client::where('ssn_hash', $hash);
+        if ($id) {
+            $query->where('id', '!=', $id);
+        }
+        return $query->exists() ? false : true;
+    }
+}

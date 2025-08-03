@@ -1,0 +1,50 @@
+/* General email styles */
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    border-radius: 5px;
+}
+
+h1, h2, h3 {
+    color: #333;
+}
+
+a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Specific styles for the recovery codes email */
+.recovery-codes {
+    margin-top: 20px;
+}
+
+.recovery-codes h2 {
+    font-size: 18px;
+}
+
+.recovery-codes ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.recovery-codes li {
+    background: #eee;
+    margin: 5px 0;
+    padding: 10px;
+    border-radius: 3px;
+}
