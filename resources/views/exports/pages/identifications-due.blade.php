@@ -11,7 +11,6 @@
                     <th>Legal Status</th>
                     <th>Identification</th>
                     <th>ID. Expiration Date</th>
-                    <th>Address</th>
                 </tr>
             </thead>
             <tbody>
@@ -29,7 +28,7 @@
                                 {{ $client->identification_expiration_date?->format('m/d/Y') }}
                             </flux:badge>
                         </td>
-                        <td>{{ $client->full_address }}</td>
+
                     </tr>
                 @endforeach
             </tbody>

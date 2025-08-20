@@ -32,17 +32,20 @@ class HowpaContract extends Form
     public ?SupportCollection $recentLivingSituations = null;
     public ?int $cityId = null;
     public ?Collection $cities = null;
-    public ?int $programBranchId = null;
     public ?string $date = null;
+    public ?string $reCertificationDate = null;
+
     public ?int $numberBedroomsReq = null;
     public ?int $numberBedroomsApproved = null;
     public ?string $recentLivingSituation = null;
     public ?string $recentLivingSituationNotes = null;
     public bool $ownsRealEstate = false;
+    public bool $ownAnyStockOrBonds = false;
     public bool $hasSavings = false;
-    public ?float $savingsBalance = null;
+    public ?string $howpaClientNumber = null;
+    public ?string $savingsBalance = null;
     public bool $hasCheckingAccount = false;
-    public ?float $checkingAvgBalanceSixMonths = null;
+    public ?string $checkingAvgBalanceSixMonths = null;
     public ?string $assetsNotes = null;
     public bool $outsideSupport = false;
     public ?string $outsideSupportExplanation = null;
@@ -52,8 +55,13 @@ class HowpaContract extends Form
     public bool $howpaPriorTo2023 = false;
     public bool $currentlyReceivingOtherAid = false;
     public bool $agreedStatements = false;
+    public   $clientServiceSpecialists = null;
+    public ?int $clientServiceSpecialistId = null;
+    public ?string $howpaSsn = null;
     public ?Collection $emergencyContacts = null;
     public ?int $emergencyContactId = null;
+    public ?Collection $programBranches = null;
+    public ?int $programBranchId = null;
     public ?EmergencyContact $emergencyContactOne = null;
     public ?EmergencyContact $emergencyContactTwo = null;
     protected HowpaContractRepositoryInterface $howpaContractRepository;
@@ -61,36 +69,51 @@ class HowpaContract extends Form
     protected CityRepositoryInterface $cityRepository;
     protected ClientPhoneNumberRepositoryInterface $clientPhoneNumberRepository;
     protected EmergencyContactRepositoryInterface $emergencyContactRepository;
-    public function boot(
-        HowpaContractRepositoryInterface $howpaContractRepository,
-        ClientRepositoryInterface $clientRepository,
-        CityRepositoryInterface $cityRepository,
-        ClientPhoneNumberRepositoryInterface $clientPhoneNumberRepository,
-        EmergencyContactRepositoryInterface $emergencyContactRepository
-    ) {
-        $this->howpaContractRepository = $howpaContractRepository;
-        $this->clientRepository = $clientRepository;
-        $this->cityRepository = $cityRepository;
-        $this->clientPhoneNumberRepository = $clientPhoneNumberRepository;
-        $this->emergencyContactRepository = $emergencyContactRepository;
+    public function boot()
+    {
+        $this->howpaContractRepository = app(HowpaContractRepositoryInterface::class);
+        $this->clientRepository = app(ClientRepositoryInterface::class);
+        $this->cityRepository = app(CityRepositoryInterface::class);
+        $this->clientPhoneNumberRepository = app(ClientPhoneNumberRepositoryInterface::class);
+        $this->emergencyContactRepository = app(EmergencyContactRepositoryInterface::class);
     }
     public function rules()
     {
         return  [
-            'clientId' => 'required|exists:clients,id',
+            'clientId' => ['required', Rule::exists('clients', 'id'), function ($attribute, $value, $fail) {
+                if (!$this->id && $this->date && $this->clientRepository->hasHowpaContractActive($this->date, $value)) {
+                    $fail('The client already has an active HOWPA contract for the selected date.');
+                }
+            }],
             'cityId' => 'required|exists:cities,id',
-            'phoneNumberId' => 'required|exists:client_phone_numbers,id',
+            'clientPhoneNumberId' => 'required|exists:client_phone_numbers,id',
             'programBranchId' => 'required|exists:program_branches,id',
-            'date' => 'required|date',
-            'numberBedroomsReq' => 'required|integer|min:0',
-            'numberBedroomsApproved' => 'required|integer|min:0',
+            'date' => ['required', 'date', 'before:reCertificationDate'],
+            'reCertificationDate' => ['required', 'date', 'after:date'],
+            'numberBedroomsReq' => [
+                'nullable',
+                'integer',
+                'min:0'
+            ],
+            'numberBedroomsApproved' => 'nullable|integer|min:0',
+            'clientServiceSpecialistId' => ['required',  function ($attribute, $value, $fail) {
+                if ($this->programBranchId) {
+                    $exists = $this->clientRepository->getClientServiceSpecialistsByProgramBranch($this->programBranchId)
+                        ->contains('id', $value);
+                    if (!$exists) {
+                        $fail('The selected client service specialist does not belong to the program of the meal contract type.');
+                    }
+                } else {
+                    $fail('The meal contract type must be selected to validate the client service specialist.');
+                }
+            },],
             'recentLivingSituation' => ['required', 'string', Rule::in(collect(RecentLivingSituation::cases())->pluck('name')->toArray())],
             'recentLivingSituationNotes' => ['nullable', 'string', Rule::excludeIf($this->recentLivingSituation !== RecentLivingSituation::OTHER->name), Rule::requiredIf($this->recentLivingSituation === RecentLivingSituation::OTHER->name), 'max:255'],
             'ownsRealEstate' => 'boolean',
             'hasSavings' => 'boolean',
-            'savingsBalance' => 'nullable|numeric|min:0',
+            'savingsBalance' => ['nullable', 'numeric', 'min:0', Rule::requiredIf(fn() => $this->hasSavings)],
             'hasCheckingAccount' => 'boolean',
-            'checkingAvgBalanceSixMonths' => 'nullable|numeric|min:0',
+            'checkingAvgBalanceSixMonths' => ['nullable', 'numeric', 'min:0', Rule::requiredIf(fn() => $this->hasCheckingAccount)],
             'assetsNotes' => ['nullable', 'string', 'max:255'],
             'outsideSupport' => 'boolean',
             'outsideSupportExplanation' => ['nullable', 'string', 'max:255', Rule::excludeIf(!$this->outsideSupport), Rule::requiredIf($this->outsideSupport)],
@@ -102,6 +125,12 @@ class HowpaContract extends Form
             'agreedStatements' => 'boolean',
             'emergencyContactOneId' => 'nullable|exists:emergency_contacts,id',
             'emergencyContactTwoId' => 'nullable|exists:emergency_contacts,id',
+            'howpaClientNumber' => ['nullable', 'string', Rule::unique('clients', 'howpa_client_number')->ignore($this->id)],
+            'howpaSsn' => ['required', 'string', 'regex:/^\d{3}-\d{2}-\d{4}$/', function ($attribute, $value, $fail) {
+                if (!$this->clientRepository->isValidHowpaSsn($value, $this->id)) {
+                    $fail('The SSN is invalid.');
+                }
+            }],
         ];
     }
     public function messages(): array
@@ -113,8 +142,8 @@ class HowpaContract extends Form
 
             'cityId.required' => 'City is required.',
             'cityId.exists' => 'Selected city does not exist.',
-            'phoneNumberId.required' => 'Phone number is required.',
-            'phoneNumberId.exists' => 'Selected phone number does not exist.',
+            'clientPhoneNumberId.required' => 'Phone number is required.',
+            'clientPhoneNumberId.exists' => 'Selected phone number does not exist.',
             'programBranchId.required' => 'Program branch is required.',
             'programBranchId.exists' => 'Selected program branch does not exist.',
 
@@ -161,6 +190,10 @@ class HowpaContract extends Form
             'agreedStatements.boolean' => 'You must agree to the statements.',
             'emergencyContactOneId.exists' => 'Selected emergency contact one does not exist.',
             'emergencyContactTwoId.exists' => 'Selected emergency contact two does not exist.',
+
+            'clientId.exists' => 'Selected client does not exist.',
+
+
         ];
     }
     public function setData(?int $id = null)
@@ -170,10 +203,13 @@ class HowpaContract extends Form
             if ($result) {
                 $this->id = $result->id;
                 $this->clientId = $result->client_id;
+                $this->getClientById($this->clientId);
                 $this->programBranchId = $result->program_branch_id;
-                $this->date = $result->date;
+                $this->date = $result->date?->format('Y-m-d');
+                $this->reCertificationDate = $result->re_certification_date?->format('Y-m-d');
                 $this->numberBedroomsReq = $result->number_bedrooms_req;
                 $this->numberBedroomsApproved = $result->number_bedrooms_approved;
+                $this->getRecentLivingSituations();
                 $this->recentLivingSituation = $result->recent_living_situation;
                 $this->recentLivingSituationNotes = $result->recent_living_situation_notes;
                 $this->ownsRealEstate = $result->owns_real_estate;
@@ -192,6 +228,21 @@ class HowpaContract extends Form
                 $this->agreedStatements = $result->agreed_statements;
                 $this->emergencyContactOneId = $result->emergency_contact_one_id;
                 $this->emergencyContactTwoId = $result->emergency_contact_two_id;
+                $this->howpaClientNumber = $result->client?->howpa_client_number;
+                $this->howpaSsn = $result->client?->howpa_ssn;
+                $this->getProgramBranches();
+                $this->programBranchId = $result->program_branch_id;
+                $this->getclientServiceSpecialists();
+                $this->clientServiceSpecialistId = $result->client_service_specialist_id;
+                $this->getCities();
+                $this->cityId = $result->city_id;
+                $this->getClientPhoneNumbers();
+                $this->clientPhoneNumberId = $result->phone_number_id;
+                $this->ownAnyStockOrBonds = $result->own_any_stock_or_bonds;
+                $this->emergencyContactOneId = $result->emergency_contact_one_id;
+                $this->getEmergencyContactOne();
+                $this->emergencyContactTwoId = $result->emergency_contact_two_id;
+                $this->getEmergencyContactTwo();
             }
         }
     }
@@ -201,13 +252,18 @@ class HowpaContract extends Form
         $this->validate($this->rules(), $this->messages());
         $data = [
             'client_id' => $this->clientId,
+            'city_id' => $this->cityId,
+            'phone_number_id' => $this->clientPhoneNumberId,
             'program_branch_id' => $this->programBranchId,
             'date' => $this->date,
+            're_certification_date' => $this->reCertificationDate,
+            'client_service_specialist_id' => $this->clientServiceSpecialistId,
             'number_bedrooms_req' => $this->numberBedroomsReq,
             'number_bedrooms_approved' => $this->numberBedroomsApproved,
             'recent_living_situation' => $this->recentLivingSituation,
             'recent_living_situation_notes' => $this->recentLivingSituationNotes,
             'owns_real_estate' => $this->ownsRealEstate,
+            'own_any_stock_or_bonds' => $this->ownAnyStockOrBonds,
             'has_savings' => $this->hasSavings,
             'savings_balance' => $this->savingsBalance,
             'has_checking_account' => $this->hasCheckingAccount,
@@ -229,6 +285,10 @@ class HowpaContract extends Form
         } else {
             $this->howpaContractRepository->create($data);
         }
+        $this->clientRepository->update($this->clientId, [
+            'howpa_client_number' => $this->howpaClientNumber,
+            'howpa_ssn' => $this->howpaSsn,
+        ]);
         $this->reset();
     }
     public function delete()
@@ -259,7 +319,7 @@ class HowpaContract extends Form
 
     public function getCities()
     {
-        $this->reset(['cityId']);
+
         $this->cities = $this->cityRepository->getAll();
     }
     public function getClientPhoneNumbers()
@@ -277,6 +337,7 @@ class HowpaContract extends Form
 
     public function getEmergencyContacts()
     {
+
         $this->emergencyContacts = $this->emergencyContactRepository->getFiltered(null, $this->clientId)
             ->when($this->emergencyContactOne, function ($query) {
                 $query->where('id', '!=', $this->emergencyContactOne->id);
@@ -289,19 +350,38 @@ class HowpaContract extends Form
     public function getEmergencyContactOne()
     {
         $this->validate([
-            'emergencyContactId' => 'required|exists:emergency_contacts,id',
+            'emergencyContactId' => ['nullable', 'exists:emergency_contacts,id', Rule::requiredIf(fn() => !$this->emergencyContactOneId)],
+            'emergencyContactOneId' => ['nullable', 'exists:emergency_contacts,id', Rule::requiredIf(fn() => !$this->emergencyContactId)],
         ]);
-        $this->emergencyContactOne = $this->emergencyContactRepository->findById($this->emergencyContactId);
+
+        $this->emergencyContactOne = $this->emergencyContactId ? $this->emergencyContactRepository->findById($this->emergencyContactId) : $this->emergencyContactRepository->findById($this->emergencyContactOneId);
+        $this->emergencyContactOneId = $this->emergencyContactOne?->id;
         $this->reset(['emergencyContactId']);
         $this->getEmergencyContacts();
     }
     public function getEmergencyContactTwo()
     {
         $this->validate([
-            'emergencyContactId' => 'required|exists:emergency_contacts,id',
+            'emergencyContactId' => ['nullable', 'exists:emergency_contacts,id'],
+            'emergencyContactTwoId' => ['nullable', 'exists:emergency_contacts,id', Rule::requiredIf(fn() => !$this->emergencyContactId)],
         ]);
-        $this->emergencyContactTwo = $this->emergencyContactRepository->findById($this->emergencyContactId);
+        $this->emergencyContactTwo = $this->emergencyContactId ? $this->emergencyContactRepository->findById($this->emergencyContactId) : $this->emergencyContactRepository->findById($this->emergencyContactTwoId);
+        $this->emergencyContactTwoId = $this->emergencyContactTwo?->id;
         $this->reset(['emergencyContactId']);
         $this->getEmergencyContacts();
+    }
+
+    public function getClientById(int $id)
+    {
+        $this->client = $this->clientRepository->findById($id);
+    }
+    public function getProgramBranches()
+    {
+        $this->programBranches = $this->howpaContractRepository->getProgramBranches();
+    }
+    public function getClientServiceSpecialists()
+    {
+
+        $this->clientServiceSpecialists = $this->clientRepository->getClientServiceSpecialistsByProgramBranch($this->programBranchId);
     }
 }

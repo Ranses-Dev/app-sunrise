@@ -27,6 +27,7 @@ class Create extends Component
         $this->form->getHealthcareProviderPlans();
         $this->form->getGenders();
         $this->form->getEthnicities();
+        $this->form->getHousingStatuses();
     }
     public function render()
     {
@@ -81,7 +82,7 @@ class Create extends Component
     {
         if (!$this->form->editAddPayment) {
 
-            $this->reset('form.paymentAmount', 'form.frequencyPayment','form.paymentAmounts');
+            $this->reset('form.paymentAmount', 'form.frequencyPayment', 'form.paymentAmounts');
             $this->resetValidation('form.paymentAmount');
             $this->resetValidation('form.frequencyPayment');
         }

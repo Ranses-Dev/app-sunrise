@@ -17,24 +17,26 @@ class ProgramSeeder extends Seeder
             1 => [
                 'name' => 'HOWPA',
                 'branches' => [
-                    1 => 'LONG TERM',
-                    2 => 'SHORT TERM',
-                    3 => 'INSP'
+                    ['name' => 'LONG TERM'],
+                    ['name' => 'SHORT TERM'],
+                    ['name' => 'INSP']
                 ]
             ],
             2 => ['name' => 'INSPECTIONS', 'branches' => [
-                4 => 'HOPWA',
-                5 => 'HQS'
+                ['name' => 'HOME', 'description' => 'AFFORDABILITY-FIRST TIME HOME BUYERS'],
+                ['name' => 'CDBG', 'description' => 'SECTION 8 - MOD REHAB'],
+                ['name' => 'HOPWA-Q', 'description' => 'QUALITY INSPECTIONS'],
+                ['name' => 'HOPWA-S', 'description' => 'HOPWA S OUR CLIENTS']
             ]],
             3 => ['name' => 'MEALS', 'branches' => [
-                6 => 'API',
-                7 => 'MIAMI GARDENS',
-                8 => 'PUBLIC SERVICE',
-                9 => 'OTHERS'
+                ['name' => 'API'],
+                ['name' => 'MIAMI GARDENS'],
+                ['name' => 'PUBLIC SERVICE'],
+                ['name' => 'OTHERS']
             ]],
             4 => ['name' => 'RENTAL', 'branches' => [
-                10 => 'SRAP',
-                11 => 'OTHERS'
+                ['name' => 'SRAP'],
+                ['name' => 'OTHERS']
             ]],
         ];
 
@@ -46,11 +48,11 @@ class ProgramSeeder extends Seeder
                 'updated_at' => now(),
             ]);
 
-            foreach ($data['branches'] as $branchIndex => $branchName) {
+            foreach ($data['branches'] as  $branchName) {
                 DB::table('program_branches')->insert([
-                    'id' => $branchIndex,
                     'program_id' => $id,
-                    'name' => $branchName,
+                    'name' => $branchName['name'],
+                    'description' => $branchName['description'] ?? null,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);

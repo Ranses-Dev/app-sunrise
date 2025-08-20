@@ -10,24 +10,26 @@
     <x-common.container-table>
         <flux:table :paginate="$this->form->result()">
             <flux:table.columns>
-                <flux:table.column>First Name</flux:table.column>
-                <flux:table.column>Last Name</flux:table.column>
+                <flux:table.column>Full Name</flux:table.column>
+                <flux:table.column>Howpa Client Number</flux:table.column>
                 <flux:table.column>Program</flux:table.column>
                 <flux:table.column>City</flux:table.column>
                 <flux:table.column>Date</flux:table.column>
-                <flux:table.column>Number of Bedrooms Required</flux:table.column>
-                <flux:table.column>Number of Bedrooms Approved</flux:table.column>
+                <flux:table.column>Re-Certification Date</flux:table.column>
+                <flux:table.column>Status</flux:table.column>
             </flux:table.columns>
             <flux:table.rows>
                 @foreach ($this->form->result() as $result)
                     <flux:table.row :key="$result->id">
-                        <flux:table.cell>{{ $result->client?->first_name }}</flux:table.cell>
-                        <flux:table.cell>{{ $result->client?->last_name }}</flux:table.cell>
+                        <flux:table.cell>{{ $result->client?->full_name }}</flux:table.cell>
+                        <flux:table.cell>{{ $result->client?->howpa_client_number }}</flux:table.cell>
                         <flux:table.cell>{{ $result->programBranch?->name }}</flux:table.cell>
                         <flux:table.cell>{{ $result->city?->name }}</flux:table.cell>
                         <flux:table.cell>{{ $result->date?->format('m/d/Y') }}</flux:table.cell>
-                        <flux:table.cell>{{ $result->bedrooms_required }}</flux:table.cell>
-                        <flux:table.cell>{{ $result->bedrooms_approved }}</flux:table.cell>
+                        <flux:table.cell>{{ $result->re_certification_date?->format('m/d/Y') }}</flux:table.cell>
+                        <flux:table.cell>
+                            <flux:badge variant="solid" color="{{ $result->is_active ? 'green' : 'red' }}">{{ $result->is_active ? 'Active' : 'Inactive' }}</flux:badge>
+                        </flux:table.cell>
                         <flux:table.cell>
                             <flux:dropdown>
                                 <flux:button icon:trailing="ellipsis-vertical"></flux:button>

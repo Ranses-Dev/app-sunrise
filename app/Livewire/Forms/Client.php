@@ -17,9 +17,9 @@ use App\Repositories\HealthcareProviderRepositoryInterface as HealthcareProvider
 use App\Repositories\HealthcareProviderPlanRepositoryInterface as HealthcareProviderPlanRepository;
 use App\Repositories\GenderRepositoryInterface as GenderRepository;
 use App\Repositories\EthnicityRepositoryInterface as EthnicityRepository;
+use App\Repositories\HousingStatusRepositoryInterface as HousingStatusRepository;
 use App\Traits\ImageHandler;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Log;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Str;
 
@@ -31,8 +31,9 @@ class Client extends Form
     public ?string $firstName = null;
     public ?string $lastName = null;
     public ?string $dob = null;
+
+    public ?string $effectiveDate = null;
     public ?string $ssn = null;
-    public ?string $clientNumber = null;
     public ?int $legalStatusId = null;
     public ?int $identificationTypeId = null;
     public ?string $identificationNumber = null;
@@ -51,7 +52,8 @@ class Client extends Form
     public ?int $ethnicityId = null;
     public ?int $healthcareProviderId = null;
     public ?int $healthcareProviderPlanId = null;
-
+    public ?int $housingStatusId = null;
+    public ?string $clientNumber = null;
     public ?bool $existsFileIdentificationCard = null;
     protected ClientRepository $clientRepository;
     protected LegalStatusRepository $legalStatusRepository;
@@ -63,6 +65,7 @@ class Client extends Form
     protected HealthcareProviderPlanRepository $healthcareProviderPlanRepository;
     protected GenderRepository $genderRepository;
     protected EthnicityRepository $ethnicityRepository;
+    protected HousingStatusRepository $housingStatusRepository;
     public $statuses = null;
     public $identificationTypes = null;
     public $cityDistricts = null;
@@ -72,6 +75,7 @@ class Client extends Form
     public $healthcareProviderPlans = null;
     public $genders = null;
     public $ethnicities = null;
+    public $housingStatuses = null;
 
     //For Payments
     public bool $editAddPayment = false;
@@ -80,28 +84,19 @@ class Client extends Form
     public string|null $frequencyPayment = null;
 
 
-    public function boot(
-        ClientRepository $clientRepository,
-        LegalStatusRepository $legalStatusRepository,
-        IdentificationTypeRepository $identificationTypeRepository,
-        CityDistrictRepository $cityDistrictRepository,
-        CountyDistrictRepository $countyDistrictRepository,
-        CityRepository $cityRepository,
-        HealthcareProviderRepository $healthcareProviderRepository,
-        HealthcareProviderPlanRepository $healthcareProviderPlanRepository,
-        GenderRepository $genderRepository,
-        EthnicityRepository $ethnicityRepository
-    ) {
-        $this->clientRepository = $clientRepository;
-        $this->legalStatusRepository = $legalStatusRepository;
-        $this->identificationTypeRepository = $identificationTypeRepository;
-        $this->cityDistrictRepository = $cityDistrictRepository;
-        $this->countyDistrictRepository = $countyDistrictRepository;
-        $this->cityRepository = $cityRepository;
-        $this->healthcareProviderRepository = $healthcareProviderRepository;
-        $this->healthcareProviderPlanRepository = $healthcareProviderPlanRepository;
-        $this->genderRepository = $genderRepository;
-        $this->ethnicityRepository = $ethnicityRepository;
+    public function boot()
+    {
+        $this->clientRepository = app(ClientRepository::class);
+        $this->legalStatusRepository = app(LegalStatusRepository::class);
+        $this->identificationTypeRepository = app(IdentificationTypeRepository::class);
+        $this->cityDistrictRepository = app(CityDistrictRepository::class);
+        $this->countyDistrictRepository = app(CountyDistrictRepository::class);
+        $this->cityRepository = app(CityRepository::class);
+        $this->healthcareProviderRepository = app(HealthcareProviderRepository::class);
+        $this->healthcareProviderPlanRepository = app(HealthcareProviderPlanRepository::class);
+        $this->genderRepository = app(GenderRepository::class);
+        $this->ethnicityRepository = app(EthnicityRepository::class);
+        $this->housingStatusRepository = app(HousingStatusRepository::class);
     }
 
     public function rules(): array
@@ -110,7 +105,8 @@ class Client extends Form
             'firstName' => ['required', 'string', 'max:255'],
             'lastName' => ['required', 'string', 'max:255'],
             'dob' => ['required', 'date', 'before:today'],
-            'ssn' => ['required', 'string', 'regex:/^\d{3}-?\d{2}-?\d{4}$/'],
+            'effectiveDate' => ['required', 'date', 'after_or_equal:dob', 'before_or_equal:today'],
+            'ssn' => ['required', 'string', 'regex:/^\d{4}$/'],
             'paymentAmounts' => ['nullable', 'array', function ($attribute, $value) {
                 if ($this->editAddPayment && empty($value)) {
                     $this->addError($attribute, 'The payments amount field is required when adding a payment.');
@@ -123,7 +119,6 @@ class Client extends Form
                 }
             }],
             'frequencyPayment' => ['nullable', 'string', Rule::requiredIf($this->editAddPayment), Rule::in(PaymentFrequency::values())],
-            'clientNumber' => ['required', 'string', 'max:255', Rule::unique('clients', 'client_number')->ignore($this->id)],
             'legalStatusId' => ['required', 'exists:legal_statuses,id'],
             'identificationTypeId' => ['required', 'exists:identification_types,id'],
             'identificationNumber' => ['required', 'string', 'max:255', Rule::unique('clients', 'identification_number')->ignore($this->id)],
@@ -135,7 +130,7 @@ class Client extends Form
             'identificationPicture' => [
                 'nullable',
                 'file',
-                'max:2048',
+                'max:4096',
                 'mimes:jpeg,png,jpg,pdf',
                 new RequiredIf(fn(): bool => empty($this->identificationPictureBase64) && !$this->id)
             ],
@@ -163,13 +158,14 @@ class Client extends Form
                 'nullable',
                 'exists:healthcare_provider_plans,id',
             ],
+            'housingStatusId' => ['nullable', 'exists:housing_statuses,id'],
 
         ];
     }
     public function messages(): array
     {
         return [
-            'clientNumber.unique' => 'The client number has already been taken.',
+
             'identificationNumber.unique' => 'The identification number has already been taken.',
             'email.unique' => 'The email has already been taken.',
             'identificationPictureBase64.required' => 'The identification picture is required.',
@@ -183,6 +179,11 @@ class Client extends Form
             'identificationPicture.max' => 'The identification picture must not be greater than 2048 kilobytes.',
             'identificationPicture.mimes' => 'The identification picture must be a file of type: jpeg, png, jpg.',
             'identificationPicture.required_if' => 'The  identification picture is required.',
+            'effectiveDate.required' => 'The effective date is required.',
+            'effectiveDate.date' => 'The effective date must be a valid date.',
+            'effectiveDate.after_or_equal' => 'The effective date must be after or equal to the date of birth.',
+            'effectiveDate.before' => 'The effective date must be before today.',
+            'housingStatusId.exists' => 'The selected housing status is invalid.',
 
         ];
     }
@@ -197,7 +198,6 @@ class Client extends Form
                 $this->lastName = $result->last_name;
                 $this->dob = $result->dob ? Carbon::parse($result->dob)->format('Y-m-d') : null;
                 $this->ssn = $result->ssn;
-                $this->clientNumber = $result->client_number;
                 $this->legalStatusId = $result->legal_status_id;
                 $this->identificationTypeId = $result->identification_type_id;
                 $this->identificationNumber = $result->identification_number;
@@ -219,6 +219,10 @@ class Client extends Form
                     $this->frequencyPayment = $result->frequency_payment;
                     $this->paymentAmounts = $result->payment_amounts;
                 }
+                $this->clientNumber = $result->client_number;
+                $this->getHousingStatuses();
+                $this->housingStatusId = $result->housing_status_id;
+                $this->effectiveDate = $result->effective_date? Carbon::parse($result->effective_date)->format('Y-m-d') : null;
             }
         }
     }
@@ -229,27 +233,28 @@ class Client extends Form
         $uuid = Str::uuid();
         $this->validate($this->rules(), $this->messages());
         $data = [
-            'first_name' => $this->firstName,
-            'last_name' => $this->lastName,
-            'dob' => $this->dob,
-            'ssn' => $this->ssn,
-            'client_number' => $this->clientNumber,
-            'legal_status_id' => $this->legalStatusId,
-            'identification_type_id' => $this->identificationTypeId,
-            'identification_number' => $this->identificationNumber,
-            'identification_expiration_date' => $this->identificationExpirationDate,
             'address' => $this->address,
-            'zip_code' => $this->zipCode,
             'city_district_id' => $this->cityDistrictId,
-            'county_district_id' => $this->countyDistrictId,
             'city_id' => $this->cityId,
+            'county_district_id' => $this->countyDistrictId,
+            'dob' => $this->dob,
+            'effective_date' => $this->effectiveDate,
             'email' => $this->email,
-            'gender_id' => $this->genderId,
             'ethnicity_id' => $this->ethnicityId,
+            'first_name' => $this->firstName,
+            'frequency_payment' => $this->frequencyPayment,
+            'gender_id' => $this->genderId,
             'healthcare_provider_id' => $this->healthcareProviderId,
             'healthcare_provider_plan_id' => $this->healthcareProviderPlanId,
-            'frequency_payment' => $this->frequencyPayment,
+            'housing_status_id' => $this->housingStatusId,
+            'identification_expiration_date' => $this->identificationExpirationDate,
+            'identification_number' => $this->identificationNumber,
+            'identification_type_id' => $this->identificationTypeId,
+            'last_name' => $this->lastName,
+            'legal_status_id' => $this->legalStatusId,
             'payment_amounts' => $this->paymentAmounts,
+            'ssn' => $this->ssn,
+            'zip_code' => $this->zipCode,
         ];
 
         if ($this->id) {
@@ -282,28 +287,29 @@ class Client extends Form
             $this->clientRepository->create($data);
         }
         $this->reset([
-            'id',
-            'firstName',
-            'lastName',
-            'dob',
-            'ssn',
-            'clientNumber',
-            'legalStatusId',
-            'identificationTypeId',
-            'identificationNumber',
-            'identificationExpirationDate',
-            'identificationPictureBase64',
             'address',
-            'zipCode',
             'cityDistrictId',
-            'countyDistrictId',
             'cityId',
-            'email',
-            'genderId',
-            'frequencyPayment',
-            'paymentAmounts',
+            'countyDistrictId',
+            'dob',
             'editAddPayment',
-            'paymentAmount'
+            'effectiveDate',
+            'email',
+            'firstName',
+            'frequencyPayment',
+            'genderId',
+            'housingStatusId',
+            'id',
+            'identificationExpirationDate',
+            'identificationNumber',
+            'identificationPictureBase64',
+            'identificationTypeId',
+            'lastName',
+            'legalStatusId',
+            'paymentAmount',
+            'paymentAmounts',
+            'ssn',
+            'zipCode',
         ]);
     }
     public function delete()
@@ -364,5 +370,10 @@ class Client extends Form
         if (($key = array_search($amount, $this->paymentAmounts)) !== false) {
             unset($this->paymentAmounts[$key]);
         }
+    }
+
+    public function getHousingStatuses()
+    {
+        $this->housingStatuses = $this->housingStatusRepository->getAll();
     }
 }

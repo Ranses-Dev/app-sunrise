@@ -29,7 +29,6 @@ interface ClientRepositoryInterface
     public function certificationsOverdue(?array $filters): Builder;
     public function identificationsDue(?array $filters): Builder;
     public function identificationsOverdue(?array $filters): Builder;
-
     public function totalIdentificationsDue(): int;
     public function totalIdentificationsOverdue(): int;
     public function certificationsDue(?array $filters): Builder;
@@ -38,4 +37,8 @@ interface ClientRepositoryInterface
     public function totalClients(): int;
     public function getClientServiceSpecialistsByProgram(?int $programId): CollectionData;
     public function getClientServiceSpecialistsByProgramBranch(?int $programBranchId): CollectionData;
+
+    public function isValidHowpaSsn(string $ssn, int|null $clientId): bool;
+
+    public function hasHowpaContractActive(string $date,int $clientId):bool;
 }

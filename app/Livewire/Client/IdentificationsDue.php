@@ -101,4 +101,8 @@ class IdentificationsDue extends Component
     {
         return redirect(route('exports.clients.identifications-due', ['filters' => $this->filters]));
     }
+public function edit(int $id)
+    {
+        $this->redirect(route('clients.edit', ['id' => $id]), true);
+    }
 }

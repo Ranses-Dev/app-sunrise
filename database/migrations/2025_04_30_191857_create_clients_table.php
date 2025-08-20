@@ -15,9 +15,14 @@ return new class extends Migration {
             $table->string('first_name');
             $table->string('last_name');
             $table->date('dob');
-            $table->string('ssn')->unique();
+            $table->string('ssn');
             $table->string('ssn_hash')->nullable()->index();
+            $table->string('howpa_ssn')->nullable();
+            $table->string('howpa_ssn_hash')->nullable();
             $table->string('client_number')->unique();
+            $table->string('howpa_client_number')->nullable()->unique();
+            $table->string('meal_client_number')->nullable()->unique();
+            $table->date('effective_date')->nullable();
             $table->unsignedBigInteger('legal_status_id');
             $table->unsignedBigInteger('identification_type_id');
             $table->string('identification_number')->unique();
@@ -45,6 +50,8 @@ return new class extends Migration {
             $table->foreign('gender_id')->references('id')->on('genders')->cascadeOnDelete();
             $table->foreign('identification_type_id')->references('id')->on('identification_types')->cascadeOnDelete();
             $table->foreign('legal_status_id')->references('id')->on('legal_statuses')->cascadeOnDelete();
+            $table->foreignId('housing_status_id')->nullable()->constrained('housing_statuses')->nullOnDelete();
+            $table->unique(['identification_type_id', 'identification_number']);
             $table->timestamps();
         });
     }

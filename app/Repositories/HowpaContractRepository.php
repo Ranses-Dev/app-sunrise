@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\HowpaContract;
+use App\Models\Program;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -16,7 +17,6 @@ class HowpaContractRepository implements HowpaContractRepositoryInterface
     public function getFiltered(string|null $search = null): Builder
     {
         return HowpaContract::with(['client', 'programBranch'])->search($search);
-
     }
     public function findById(int $id): ?HowpaContract
     {
@@ -41,5 +41,9 @@ class HowpaContractRepository implements HowpaContractRepositoryInterface
             return $howpaContract->delete();
         }
         return false;
+    }
+    public function getProgramBranches(): Collection
+    {
+        return  Program::with('branches')->find(1)->branches;
     }
 }

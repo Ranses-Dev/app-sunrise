@@ -4,7 +4,7 @@
 @endcan
 @can('viewAny', \App\Models\ContractMeal::class)
     <flux:navlist.item icon="bookmark-square" href="{{ route('contract-meals.index') }}"
-        :current="request()->routeIs('contract-meals.*')" wire:navigate>Contract Meals
+        :current="request()->routeIs('contract-meals.*')" wire:navigate>Meal Contracts
     </flux:navlist.item>
 @endcan
 @can('viewAny', \App\Models\HowpaContract::class)

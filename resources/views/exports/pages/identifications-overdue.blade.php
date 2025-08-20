@@ -1,5 +1,5 @@
 <x-layouts.statistics :title="'Clients Overdue Identifications'">
-    
+
     <div class="table-container">
         <table class="table-custom">
             <thead>
@@ -23,7 +23,7 @@
                         <td>{{ $client->age }}</td>
                         <td>{{ $client->email }}</td>
                         <td>{{ $client->client_number }}</td>
-                        <td>{{ $client->legal_status_name }}</td>
+                        <td>{{ $client->legalStatus?->name }}</td>
                         <td>{{ $client->identification_data }}</td>
                         <td>
                             <flux:badge variant="solid" size="sm" color="red">

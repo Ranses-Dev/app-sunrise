@@ -25,19 +25,14 @@
                         <td>{{ $contract->household_total }}</td>
                         <td>
                             @if ($contract->income_category)
-                                <flux:badge size="sm" color="green">{{ "$contract->income_category %" }}</flux:badge>
+                                {{ "$contract->income_category %" }}
                             @endif
                         </td>
                         <td>{{ $contract->specialist_name }}</td>
                         <td>
                             @if ($contract->contract_meal_recertification_date && $contract->contract_meal_id)
-
-
-                                <flux:badge type="info" size="sm" class="mr-1">
-                                    Contract Meal:
-                                    {{ \Carbon\Carbon::parse($contract->contract_meal_recertification_date)->format('m/d/Y') }}
-                                </flux:badge>
-
+                                Contract Meal:
+                                {{ \Carbon\Carbon::parse($contract->contract_meal_recertification_date)->format('m/d/Y') }}
                             @endif
                         </td>
                     </tr>

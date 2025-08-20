@@ -34,11 +34,12 @@ class PermissionSeeder extends Seeder
             'Legal Status',
             'Monthly Assistance Payment',
             'Program',
-            'ProgramBranch',
+            'Program Branch',
             'Role',
             'User',
             'Howpa Contract',
             'Emergency Contact',
+            'Housing Status'
         ];
         $actions = ['view any', 'view', 'create', 'update', 'delete', 'restore', 'force delete'];
         foreach ($models as $model) {

@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
 use Livewire\WithoutUrlPagination;
 use Livewire\WithPagination;
 
@@ -54,14 +55,10 @@ class Create extends Component
 
 
 
-    #[Computed]
-    public function resultClients(): LengthAwarePaginator
-    {
-        return   $this->form->getClients($this->searchClient)->paginate(pageName: 'clients-contracts', perPage: 10);
-    }
-
+    #[On('selectClient')]
     public function selectClient(int $clientId)
     {
+         
         $this->client = $this->form->getClientById($clientId);
         $this->form->clientId = $this->client?->id;
         $this->showClientModal = false;
@@ -71,5 +68,10 @@ class Create extends Component
     {
         $this->form->reset('clientServiceSpecialistId');
         $this->form->loadClientServiceSpecialists();
+    }
+
+    public function clearClient()
+    {
+        $this->reset('client');
     }
 }

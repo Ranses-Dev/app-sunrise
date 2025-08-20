@@ -8,6 +8,7 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 use App\Livewire\Forms\HowpaContract as FormsHowpaContract;
 use Flux\Flux;
+use Livewire\Attributes\On;
 
 #[Title('Create Howpa Contract')]
 class Create extends Component
@@ -38,6 +39,7 @@ class Create extends Component
     public function createAndAddNew()
     {
         $this->store();
+        $this->form->reset();
     }
     public function cancel()
     {
@@ -83,5 +85,41 @@ class Create extends Component
     {
         $this->form->reset(['emergencyContactTwo']);
         $this->form->getEmergencyContacts();
+    }
+
+    public function updatedFormHasCheckingAccount()
+    {
+        if (!$this->form->hasCheckingAccount) {
+            $this->form->reset(['checkingAvgBalanceSixMonths']);
+        }
+    }
+    public function updatedFormHasSavings()
+    {
+        if (!$this->form->hasSavings) {
+            $this->form->reset(['savingsBalance']);
+        }
+    }
+
+    #[On('selectClient')]
+    public function selectClient(int $clientId)
+    {
+        $this->form->getClientById($clientId);
+        $this->form->clientId = $this->form->client?->id;
+        $this->form->getCities();
+        $this->form->getClientPhoneNumbers();
+        $this->form->getEmergencyContacts();
+        $this->form->getProgramBranches();
+        $this->form->getClientServiceSpecialists();
+    }
+
+    public function clearClient()
+    {
+        $this->form->reset(['client', 'clientId']);
+    }
+
+    public function updatedFormProgramBranchId()
+    {
+        $this->form->reset(['clientServiceSpecialistId']);
+        $this->form->getClientServiceSpecialists();
     }
 }

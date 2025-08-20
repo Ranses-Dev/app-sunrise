@@ -1,5 +1,5 @@
 <div class="flex flex-col space-y-4">
-    <x-page-heading title="Edit Client" />
+    <x-page-heading title="Edit Client: {{ $this->form->clientNumber }}" />
     <div class="flex w-full flex-row justify-center items-center">
         <form wire:submit.prevent="update" class="w-full    space-y-6">
 
@@ -13,10 +13,21 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4   ">
                         <flux:input wire:model="form.firstName" label="First Name" />
                         <flux:input wire:model="form.lastName" label="Last Name" />
-                        <flux:input wire:model="form.dob" label="Date of Birth" type="date" />
-                        <flux:input wire:model="form.ssn" mask="999-99-9999" type="password" viewable label="SSN" />
-                        <flux:input wire:model="form.clientNumber" label="Client Number" />
-
+                        <flux:date-picker wire:model="form.dob" label="Date of Birth" type="date" selectable-header
+                            with-today />
+                        <flux:date-picker wire:model="form.effectiveDate" type="date" label="Effective Date"
+                            selectable-header with-today />
+                        <flux:input wire:model="form.ssn" mask="9999" type="password" viewable label="SSN" />
+                        <flux:select wire:model="form.housingStatusId" variant="listbox" clearable searchable
+                            label="Housing Status" filter>
+                            @if($this->form->housingStatuses)
+                                @foreach ($this->form->housingStatuses as $status)
+                                    <flux:select.option value="{{ $status->id }}" wire:key="{{ $status->id }}">
+                                        {{ $status->name }}
+                                    </flux:select.option>
+                                @endforeach
+                            @endif
+                        </flux:select>
                     </div>
                 </div>
 
@@ -45,8 +56,9 @@
                             @endforeach
                         </flux:select>
                         <flux:input uppercase wire:model="form.identificationNumber" label="Identification Number" />
-                        <flux:input wire:model="form.identificationExpirationDate" label="ID Expiration Date"
-                            type="date" />
+                         
+                        <flux:date-picker wire:model="form.identificationExpirationDate" type="date" label="Identification Expiration Date"
+                            selectable-header with-today />
                     </div>
                     <div class="mt-4">
                         <flux:tab.group>

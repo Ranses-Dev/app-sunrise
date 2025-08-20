@@ -9,8 +9,19 @@
                         <flux:input wire:model="form.firstName" label="First Name" />
                         <flux:input wire:model="form.lastName" label="Last Name" />
                         <flux:date-picker wire:model="form.dob" label="Date of Birth" selectable-header with-today />
-                        <flux:input wire:model="form.ssn" mask="999-99-9999" type="password" viewable label="SSN" />
-                        <flux:input wire:model="form.clientNumber" label="Client Number" />
+                        <flux:date-picker wire:model="form.effectiveDate" label="Effective Date" selectable-header
+                            with-today />
+                        <flux:input wire:model="form.ssn" mask="9999" type="password" viewable label="SSN" />
+                        <flux:select wire:model="form.housingStatusId" variant="listbox" clearable searchable
+                            label="Housing Status" filter>
+                            @if($this->form->housingStatuses)
+                                @foreach ($this->form->housingStatuses as $status)
+                                    <flux:select.option value="{{ $status->id }}" wire:key="{{ $status->id }}">
+                                        {{ $status->name }}
+                                    </flux:select.option>
+                                @endforeach
+                            @endif
+                        </flux:select>
                     </div>
                 </x-forms.card-form>
                 <x-forms.card-form title="Identification">

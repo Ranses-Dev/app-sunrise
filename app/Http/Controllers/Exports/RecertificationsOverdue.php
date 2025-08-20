@@ -22,13 +22,13 @@ class RecertificationsOverdue extends Controller
         $contracts = $this->clientRepository->certificationsOverdue($request->input('filters'))->get();
         return Pdf::format(Format::Letter)
             ->orientation(Orientation::Landscape)
-            ->withBrowsershot(function (Browsershot $browsershot) {
+           /* ->withBrowsershot(function (Browsershot $browsershot) {
                 $browsershot
                     ->setNodeBinary('/usr/bin/node')
                     ->setNpmBinary('/usr/bin/npm')
                     ->setChromePath('/usr/bin/chromium-browser')
                     ->setOption('args', ['--no-sandbox']);
-            })
+            })*/
             ->margins(10, 10, 10, 10)
             ->download('clients-list.pdf')
             ->view('exports.pages.recertifications-overdue', compact('contracts'))

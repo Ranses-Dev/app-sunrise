@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('first_name');
             $table->string('last_name');
             $table->date('dob');
-            $table->string('ssn');
+            $table->string('ssn')->nullable();
             $table->string('ssn_hash')->nullable()->index();
             $table->unsignedBigInteger('gender_id');
             $table->unsignedBigInteger('household_relation_type_id');

@@ -93,4 +93,8 @@ class IdentificationsOverdue extends Component
     {
         return redirect(route('exports.clients.identifications-overdue', ['filters' => $this->filters]));
     }
+    public function edit(int $id)
+    {
+        $this->redirect(route('clients.edit', ['id' => $id]), true);
+    }
 }

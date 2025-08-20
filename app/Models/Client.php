@@ -20,33 +20,41 @@ class Client extends Model
 {
     use ImageHandler, LogsActivity;
     protected $fillable = [
-        'first_name',
-        'last_name',
-        'dob',
-        'ssn',
-        'client_number',
-        'legal_status_id',
-        'identification_type_id',
-        'identification_number',
-        'identification_expiration_date',
-        'identification_picture',
         'address',
-        'zip_code',
         'city_district_id',
-        'county_district_id',
         'city_id',
+        'client_number',
+        'county_district_id',
+        'dob',
         'email',
-        'gender_id',
         'ethnicity_id',
+        'effective_date',
+        'first_name',
+        'frequency_payment',
+        'gender_id',
         'healthcare_provider_id',
         'healthcare_provider_plan_id',
-        'monthly_client_payment_portion',
-        'frequency_payment',
-        'payment_amounts',
+        'housing_status_id',
+        'housing_status_id',
+        'howpa_client_number',
+        'howpa_ssn_hash',
+        'howpa_ssn',
+        'identification_expiration_date',
+        'identification_number',
+        'identification_picture',
+        'identification_type_id',
         'is_deceased',
+        'last_name',
+        'legal_status_id',
+        'meal_client_number',
+        'monthly_client_payment_portion',
+        'payment_amounts',
+        'ssn',
+        'zip_code',
     ];
     protected $casts = [
         'dob' => 'date:Y-m-d',
+        'effective_date' => 'date:Y-m-d',
         'identification_expiration_date' => 'date',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
@@ -55,6 +63,7 @@ class Client extends Model
         'is_deceased' => 'boolean',
         'payment_amounts' => 'array',
         'frequency_payment' => 'string',
+
 
     ];
 
@@ -114,7 +123,8 @@ class Client extends Model
                     ->orWhere('last_name', 'like', "%{$search}%")
                     ->orWhere('client_number', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhere('zip_code', 'like', "%{$search}%");
+                    ->orWhere('zip_code', 'like', "%{$search}%")
+                    ->orWhere('howpa_client_number', 'like', "%{$search}%");
                 if (preg_match('/^\d{3}-?\d{2}-?\d{4}$/', $search)) {
                     $query->orWhere('ssn_hash', '=', hash('sha256', $search));
                 }
@@ -138,6 +148,9 @@ class Client extends Model
     protected static function boot()
     {
         parent::boot();
+        static::creating(function (Client $model) {
+            $model->client_number = $model->generateUniqueClientNumber();
+        });
         static::saving(function (Client $model) {
             $model->income =   self::calculateIncome(
                 $model->payment_amounts,
@@ -308,35 +321,12 @@ class Client extends Model
     public static function identificationsOverdue(?array $filters): Builder
     {
         $today = now();
-        return static::query()
-            ->join('legal_statuses', 'clients.legal_status_id', '=', 'legal_statuses.id')
-            ->join('identification_types', 'clients.identification_type_id', '=', 'identification_types.id')
-            ->when(!empty($filters['city_district_id'] ?? null), function (Builder $query) use ($filters) {
-                $query->where('clients.city_district_id', $filters['city_district_id']);
+        return static::with(['identificationType', 'legalStatus'])
+            ->where('identification_expiration_date', '<', $today)
+            ->whereHas('legalStatus', function (Builder $query) {
+                $query->where('name', '!=', 'Citizen');
             })
-            ->when(!empty($filters['county_district_id'] ?? null), function (Builder $query) use ($filters) {
-                $query->where('clients.county_district_id', $filters['county_district_id']);
-            })
-            ->when(!empty($filters['city_id'] ?? null), function (Builder $query) use ($filters) {
-                $query->where('clients.city_id', $filters['city_id']);
-            })
-            ->when(!empty($filters['date_range'] ?? null), function (Builder $query) use ($filters) {
-                $dateRange = explode(' - ', $filters['date_range']);
-                if (count($dateRange) === 2) {
-                    $startDate = Carbon::parse(trim($dateRange[0]))->startOfDay();
-                    $endDate = Carbon::parse(trim($dateRange[1]))->endOfDay();
-                    $query->where('clients.identification_expiration_date', '>=', $startDate)
-                        ->where('clients.identification_expiration_date', '<=', $endDate);
-                }
-            })
-            ->whereRaw('LOWER(legal_statuses.name) != ?', ['citizen'])
-            ->where('clients.identification_expiration_date', '<', $today)
-            ->select([
-                'clients.*',
-                DB::raw("CONCAT(clients.first_name, ' ', clients.last_name) AS full_name"),
-                DB::raw("CONCAT(identification_types.name, ' - ', clients.identification_number) AS identification_data"),
-                'legal_statuses.name as legal_status_name'
-            ]);
+        ;
     }
     public static function identificationsOverdueCount(): int
     {
@@ -473,14 +463,65 @@ class Client extends Model
         $this->attributes['ssn'] = encrypt($value);
         $this->attributes['ssn_hash'] = hash('sha256', $value);
     }
+    public function setHowpaSsnAttribute($value)
+    {
+        $this->attributes['howpa_ssn'] = encrypt($value);
+        $this->attributes['howpa_ssn_hash'] = hash('sha256', $value);
+    }
     public function getSsnAttribute(): string|null
     {
         $ssn = $this->attributes['ssn'] ?? null;
+        return $ssn ? decrypt($ssn) : null;
+    }
+    public function getHowpaSsnAttribute(): string|null
+    {
+        $ssn = $this->attributes['howpa_ssn'] ?? null;
         return $ssn ? decrypt($ssn) : null;
     }
 
     public function emergencyContacts(): HasMany
     {
         return $this->hasMany(EmergencyContact::class, 'client_id');
+    }
+
+    public function generateUniqueClientNumber(): string
+    {
+
+        $year = now()->format('y');
+        $lastId = self::latest('id')->value('id') ?? 0;
+        return sprintf('%s-%03d', $year, $lastId + 1);
+    }
+
+    public static function isAvailableHowpaSsn(string $ssn, int|null $clientId = null): bool
+    {
+        if (!preg_match('/^\d{3}-\d{2}-\d{4}$/', $ssn)) {
+            return false;
+        }
+        return static::query()
+            ->where('howpa_ssn_hash', hash('sha256', $ssn))
+            ->when($clientId, function (Builder $query) use ($clientId) {
+                $query->where('id', '!=', $clientId);
+            })
+            ->doesntExist();
+    }
+
+    public function setHowpaClientNumberAttribute($value)
+    {
+        $this->attributes['howpa_client_number'] = strtoupper($value);
+    }
+    public static function clientHasHowpaContractActive(string $date, int $clientId): bool
+    {
+        return static::query()
+            ->whereHas('howpaContracts', function (Builder $query) use ($date) {
+                $query->whereDate('date', '<=', $date)
+                    ->whereDate('re_certification_date', '>=', $date);
+            })
+            ->where('id', $clientId)
+            ->exists();
+    }
+    public function getIdentificationDataAttribute()
+    {
+         $this->loadMissing('identificationType');
+         return $this->identificationType ? "{$this->identificationType->name} - {$this->identification_number}" : null;
     }
 }

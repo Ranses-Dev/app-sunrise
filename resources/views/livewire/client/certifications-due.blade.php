@@ -55,8 +55,7 @@
     <x-common.container-table>
         <flux:table :paginate="$this->results">
             <flux:table.columns>
-                <flux:table.column>First Name </flux:table.column>
-                <flux:table.column>Last Name</flux:table.column>
+                <flux:table.column>Full Name </flux:table.column>
                 <flux:table.column>Client Number</flux:table.column>
                 <flux:table.column>Age</flux:table.column>
                 <flux:table.column>Income</flux:table.column>
@@ -69,8 +68,7 @@
             <flux:table.rows>
                 @foreach ($this->results as $result)
                     <flux:table.row :key="$result->id">
-                        <flux:table.cell>{{ $result->first_name }}</flux:table.cell>
-                        <flux:table.cell>{{ $result->last_name }}</flux:table.cell>
+                        <flux:table.cell>{{ $result->full_name }}</flux:table.cell>
                         <flux:table.cell>{{ $result->client_number }}</flux:table.cell>
                         <flux:table.cell>{{ $result->age }}</flux:table.cell>
                         <flux:table.cell>{{ $result->income }}</flux:table.cell>
@@ -85,7 +83,7 @@
                             @if ($result->contract_meal_recertification_date && $result->contract_meal_id)
                                 <flux:link wire:navigate href="{{ route('clients.edit', $result->contract_meal_id) }}"
                                     class="flex items-center">
-                                    <flux:badge type="info" class="mr-1">
+                                    <flux:badge color="red" class="mr-1">
                                         Contract Meal:
                                         {{ \Carbon\Carbon::parse($result->contract_meal_recertification_date)->format('m/d/Y') }}
                                     </flux:badge>

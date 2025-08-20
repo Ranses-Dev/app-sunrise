@@ -173,4 +173,13 @@ class ClientRepository implements ClientRepositoryInterface
         }
         return $query->exists() ? false : true;
     }
+
+    public function isValidHowpaSsn(string $ssn, int|null $clientId): bool
+    {
+        return Client::isAvailableHowpaSsn($ssn, $clientId);
+    }
+    public function hasHowpaContractActive(string $date, int $clientId): bool
+    {
+        return Client::clientHasHowpaContractActive($date, $clientId);
+    }
 }

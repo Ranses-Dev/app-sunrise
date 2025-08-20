@@ -22,17 +22,17 @@ class ProgramRepository implements ProgramRepositoryInterface
     }
     public function update(int $id, array $data): bool
     {
-        $identificationType = $this->findById($id);
-        if ($identificationType) {
-            return $identificationType->update($data);
+        $program = $this->findById($id);
+        if ($program) {
+            return $program->update($data);
         }
         return false;
     }
     public function delete(int $id): bool
     {
-        $identificationType = $this->findById($id);
-        if ($identificationType) {
-            return $identificationType->delete();
+        $program = $this->findById($id);
+        if ($program) {
+            return $program->delete();
         }
         return false;
     }

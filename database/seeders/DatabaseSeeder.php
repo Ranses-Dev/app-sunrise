@@ -35,17 +35,11 @@ class DatabaseSeeder extends Seeder
             MealContractTypeSeeder::class,
             DeliveryCostSeeder::class,
             FoodCostSeeder::class,
-            ProgramDeliveryCostSeeder::class
+            ProgramDeliveryCostSeeder::class,
+            HousingStatusSeeder::class
         ]);
         $usersData = [
-            [
-                'name' => 'admin',
-                'email' => 'abel.monzon@911dc.us',
-            ],
-            [
-                'name' => 'ranses',
-                'email' => 'ransessanchez1506@gmail.com',
-            ],
+
             [
                 'name' => 'test',
                 'email' => 'test@example.com',

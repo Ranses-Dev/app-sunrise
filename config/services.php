@@ -34,5 +34,11 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+    'smarty' => [
+        'base_url' => env('SMARTY_API_BASE_URL', 'https://us-street.api.smartystreets.com/street-address'),
+        'auth_id'  => env('SMARTY_API_AUTH_ID'),
+        'auth_token' => env('SMARTY_API_AUTH_TOKEN'),
+        'timeout' => env('SMARTY_API_TIMEOUT'),
+    ]
 
 ];

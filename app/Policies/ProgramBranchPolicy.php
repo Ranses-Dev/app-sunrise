@@ -13,15 +13,15 @@ class ProgramBranchPolicy
      */
     public function viewAny(User $user): bool
     {
-        return true;
+        return $user->hasPermissionTo('view-any-program-branch') || $user->isAdmin();
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, ProgramBranch $ProgramBranch): bool
+    public function view(User $user): bool
     {
-       return true;
+        return $user->hasPermissionTo('view-program-branch') || $user->isAdmin();
     }
 
     /**
@@ -29,38 +29,38 @@ class ProgramBranchPolicy
      */
     public function create(User $user): bool
     {
-        return true;
+        return $user->hasPermissionTo('create-program-branch') || $user->isAdmin();
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, ProgramBranch $ProgramBranch): bool
+    public function update(User $user): bool
     {
-       return true;
+        return $user->hasPermissionTo('update-program-branch') || $user->isAdmin();
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, ProgramBranch $ProgramBranch): bool
+    public function delete(User $user): bool
     {
-       return true;
+        return false;
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, ProgramBranch $ProgramBranch): bool
+    public function restore(User $user): bool
     {
-       return true;
+        return false;
     }
 
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, ProgramBranch $ProgramBranch): bool
+    public function forceDelete(User $user): bool
     {
-       return true;
+        return false;
     }
 }

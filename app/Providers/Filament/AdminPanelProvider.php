@@ -58,13 +58,13 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])->authGuard('web')
-            ->emailVerification(
+            /* ->emailVerification(
                 promptAction: EmailVerificationPrompt::class,
                 isRequired: true,
-            )
+            )*/
             ->brandLogo(asset('logo.png'))
             ->plugins([
-                TwoFactorAuthenticationPlugin::make()
+                /*TwoFactorAuthenticationPlugin::make()
                     ->enableTwoFactorAuthentication(
                        // condition: true,
                        // challengeMiddleware: TwoFactorChallenge::class,
@@ -77,9 +77,7 @@ class AdminPanelProvider extends PanelProvider
                         condition: true, // Show 2FA on the user menu item
                         label: '2FA', // Menu item label
                         icon: 'heroicon-s-key', // Menu item icon
-                    )
-
-            ])
+                    )*/])
             ->profile();
     }
 }

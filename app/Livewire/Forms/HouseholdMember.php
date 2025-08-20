@@ -54,7 +54,7 @@ class HouseholdMember extends Form
             'firstName' => ['required', 'string', 'max:255'],
             'lastName' => ['required', 'string', 'max:255'],
             'dob' => ['required', 'date', 'before:today'],
-            'ssn' => ['required', 'string', 'regex:/^\d{3}-?\d{2}-?\d{4}$/', function ($attribute, $value) {
+            'ssn' => ['nullable', 'string', 'regex:/^\d{3}-?\d{2}-?\d{4}$/', function ($attribute, $value) {
                 if (strlen($value) !== 11 || !preg_match('/^\d{3}-\d{2}-\d{4}$/', $value)) {
                     $this->addError($attribute, 'The SSN must be in the format XXX-XX-XXXX.');
                 }
@@ -90,7 +90,7 @@ class HouseholdMember extends Form
                 $this->firstName = $result->first_name;
                 $this->lastName = $result->last_name;
                 $this->dob = $result->dob;
-                $this->ssn = $result->ssn;
+                $this->ssn = $result->ssn??null;
                 $this->genderId = $result->gender_id;
                 $this->householdRelationTypeId = $result->household_relation_type_id;
                 $this->ethnicityId = $result->ethnicity_id;
@@ -122,7 +122,7 @@ class HouseholdMember extends Form
         } else {
             $this->householdMemberRepository->create($data);
         }
-        $this->reset(['id', 'firstName', 'lastName','ssn', 'dob', 'genderId', 'householdRelationTypeId', 'ethnicityId', 'income']);
+        $this->reset(['id', 'firstName', 'lastName', 'ssn', 'dob', 'genderId', 'householdRelationTypeId', 'ethnicityId', 'income']);
     }
     public function delete()
     {
@@ -132,7 +132,7 @@ class HouseholdMember extends Form
     }
     public function getFiltered(string $search): LengthAwarePaginator
     {
-        return $this->householdMemberRepository->getFiltered($this->clientId,$search)
+        return $this->householdMemberRepository->getFiltered($this->clientId, $search)
             ->paginate(pageName: 'household-members-page');
     }
     public function getGenders()

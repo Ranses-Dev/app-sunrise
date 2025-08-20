@@ -31,7 +31,7 @@ class Households extends Component
     public int|null $ethnicityId = null;
     public string $firstName = '';
     public string $lastName = '';
-    public string $ssn = '';
+    public ?string $ssn = '';
     public string $dateOfBirth = '';
     public bool $hivStatus = false;
     public bool $hispanic = false;

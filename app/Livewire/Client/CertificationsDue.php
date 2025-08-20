@@ -106,4 +106,6 @@ class CertificationsDue extends Component
     {
         return redirect(route('exports.clients.recertifications-due', ['filters' => $this->filters]));
     }
+
+    
 }

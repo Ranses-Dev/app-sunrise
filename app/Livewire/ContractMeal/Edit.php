@@ -11,6 +11,7 @@ use Flux\Flux;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
 use Livewire\WithoutUrlPagination;
 use Livewire\WithPagination;
 
@@ -53,7 +54,7 @@ class Edit extends Component
     {
         return   $this->form->getClients($this->searchClient)->paginate(pageName: 'clients-contracts', perPage: 10);
     }
-
+    #[On('selectClient')]
     public function selectClient(int $clientId)
     {
         $this->client = $this->form->getClientById($clientId);
@@ -64,5 +65,9 @@ class Edit extends Component
     {
         $this->form->reset('clientServiceSpecialistId');
         $this->form->loadClientServiceSpecialists();
+    }
+    public function clearClient()
+    {
+        $this->reset('client');
     }
 }

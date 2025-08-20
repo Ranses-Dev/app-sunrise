@@ -38,6 +38,8 @@ use App\Repositories\HouseholdMemberRepository;
 use App\Repositories\HouseholdMemberRepositoryInterface;
 use App\Repositories\HouseholdRelationTypeRepository;
 use App\Repositories\HouseholdRelationTypeRepositoryInterface;
+use App\Repositories\HousingStatusRepository;
+use App\Repositories\HousingStatusRepositoryInterface;
 use App\Repositories\HowpaContractRepository;
 use App\Repositories\HowpaContractRepositoryInterface;
 use App\Repositories\IdentificationTypeRepository;
@@ -56,6 +58,8 @@ use App\Repositories\ProgramDeliveryCostRepository;
 use App\Repositories\ProgramDeliveryCostRepositoryInterface;
 use App\Repositories\ProgramRepository;
 use App\Repositories\ProgramRepositoryInterface;
+use App\Repositories\SmartyApiRepository;
+use App\Repositories\SmartyApiRepositoryInterface;
 use App\Repositories\TerminationReasonRepository;
 use App\Repositories\TerminationReasonRepositoryInterface;
 use App\Repositories\UserRepository;
@@ -179,6 +183,9 @@ class AppServiceProvider extends ServiceProvider
         );
         $this->app->bind(HowpaContractRepositoryInterface::class, HowpaContractRepository::class);
         $this->app->bind(EmergencyContactRepositoryInterface::class, EmergencyContactRepository::class);
+
+        $this->app->bind(HousingStatusRepositoryInterface::class, HousingStatusRepository::class);
+        $this->app->bind(SmartyApiRepositoryInterface::class, SmartyApiRepository::class);
     }
     /**
      * Bootstrap any application services.

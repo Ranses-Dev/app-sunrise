@@ -18,15 +18,21 @@ return new class extends Migration
             $table->foreignId('phone_number_id')->nullable()->constrained('client_phone_numbers')->nullOnDelete();
             $table->foreignId('program_branch_id')->constrained('program_branches')->cascadeOnDelete();
             $table->date('date');
-            $table->integer('number_bedrooms_req')->default(0);
-            $table->integer('number_bedrooms_approved')->default(0);
+            $table->date('re_certification_date');
+            $table->foreignId('client_service_specialist_id')
+                ->constrained('users')
+                ->references('id')
+                ->cascadeOnDelete();
+            $table->integer('number_bedrooms_req')->nullable();
+            $table->integer('number_bedrooms_approved')->nullable();
             $table->string('recent_living_situation');
             $table->string('recent_living_situation_notes')->nullable();
             $table->boolean('owns_real_estate')->default(false);
+            $table->boolean('own_any_stock_or_bonds')->default(false);
             $table->boolean('has_savings')->default(false);
-            $table->decimal('savings_balance', 10, 2)->default(0);
+            $table->decimal('savings_balance', 10, 2)->nullable()->default(0);
             $table->boolean('has_checking_account')->default(false);
-            $table->decimal('checking_avg_balance_six_months', 10, 2)->default(0);
+            $table->decimal('checking_avg_balance_six_months', 10, 2)->nullable()->default(0);
             $table->text('assets_notes')->nullable();
             $table->boolean('outside_support')->default(false);
             $table->text('outside_support_explanation')->nullable();

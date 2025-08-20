@@ -22,17 +22,17 @@ class ProgramBranchRepository implements ProgramBranchRepositoryInterface
     }
     public function update(int $id, array $data): bool
     {
-        $identificationType = $this->findById($id);
-        if ($identificationType) {
-            return $identificationType->update($data);
+        $programBranch = $this->findById($id);
+        if ($programBranch) {
+            return $programBranch->update($data);
         }
         return false;
     }
     public function delete(int $id): bool
     {
-        $identificationType = $this->findById($id);
-        if ($identificationType) {
-            return $identificationType->delete();
+        $programBranch = $this->findById($id);
+        if ($programBranch) {
+            return $programBranch->delete();
         }
         return false;
     }

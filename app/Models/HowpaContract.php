@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,31 +10,48 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class HowpaContract extends Model
 {
     protected $fillable = [
-        'client_id',
-        'city_id',
-        'phone_number_id',
-        'program_branch_id',
-        'date',
-        'number_bedrooms_req',
-        'number_bedrooms_approved',
-        'recent_living_situation',
-        'recent_living_situation_notes',
-        'owns_real_estate',
-        'has_savings',
-        'savings_balance',
-        'has_checking_account',
-        'checking_avg_balance_six_months',
-        'assets_notes',
-        'outside_support',
-        'outside_support_explanation',
-        'committed_fraud_or_asked_to_repay',
-        'fraud_explanation',
-        'has_aids',
-        'howpa_prior_to_2023',
-        'currently_receiving_other_aid',
         'agreed_statements',
+        'assets_notes',
+        'checking_avg_balance_six_months',
+        'city_id',
+        'client_id',
+        'client_service_specialist_id',
+        'committed_fraud_or_asked_to_repay',
+        'currently_receiving_other_aid',
+        'date',
+        're_certification_date',
         'emergency_contact_one_id',
         'emergency_contact_two_id',
+        'fraud_explanation',
+        'has_aids',
+        'has_checking_account',
+        'has_savings',
+        'howpa_prior_to_2023',
+        'number_bedrooms_approved',
+        'number_bedrooms_req',
+        'outside_support_explanation',
+        'outside_support',
+        'own_any_stock_or_bonds',
+        'owns_real_estate',
+        'phone_number_id',
+        'program_branch_id',
+        'recent_living_situation_notes',
+        'recent_living_situation',
+        'savings_balance',
+    ];
+
+    protected $casts = [
+        'date' => 'date',
+        're_certification_date' => 'date',
+        'has_aids' => 'boolean',
+        'howpa_prior_to_2023' => 'boolean',
+        'currently_receiving_other_aid' => 'boolean',
+        'agreed_statements' => 'boolean',
+        'outside_support' => 'boolean',
+        'own_any_stock_or_bonds' => 'boolean',
+        'owns_real_estate' => 'boolean',
+        'has_checking_account' => 'boolean',
+        'has_savings' => 'boolean',
     ];
 
     public function client(): BelongsTo
@@ -66,5 +84,15 @@ class HowpaContract extends Model
             });
         }
         return $query;
+    }
+
+    public function clientServiceSpecialist(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'client_service_specialist_id');
+    }
+
+    public function getIsActiveAttribute(): bool
+    {
+        return  Carbon::now()->isAfter($this->date) && Carbon::now()->isBefore($this->re_certification_date);
     }
 }

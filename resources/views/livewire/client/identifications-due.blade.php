@@ -53,11 +53,11 @@
                 <flux:table.column>Legal Status</flux:table.column>
                 <flux:table.column>Identification</flux:table.column>
                 <flux:table.column>ID. Expiration Date</flux:table.column>
-                <flux:table.column>Address</flux:table.column>
             </flux:table.columns>
             <flux:table.rows>
                 @foreach ($this->results as $result)
                     <flux:table.row :key="$result->id">
+
                         <flux:table.cell>{{ $result->full_name }}</flux:table.cell>
                         <flux:table.cell>{{ $result->dob?->format('m/d/Y') }}</flux:table.cell>
                         <flux:table.cell>{{ $result->age }}</flux:table.cell>
@@ -70,7 +70,11 @@
                                 {{ $result->identification_expiration_date?->format('m/d/Y') }}
                             </flux:badge>
                         </flux:table.cell>
-                       <flux:table.cell>{{ $result->full_address }}</flux:table.cell>
+                        <flux:table.cell>
+                            <flux:button variant="primary" size="sm" icon="pencil-square" wire:click="edit({{ $result->id }})" />
+                        </flux:table.cell>
+
+
                     </flux:table.row>
                 @endforeach
             </flux:table.rows>

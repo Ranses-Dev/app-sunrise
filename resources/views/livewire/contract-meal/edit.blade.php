@@ -2,39 +2,30 @@
     <form wire:submit.prevent="update" class="space-y-6">
         <x-page-heading title="Edit Contract Meal" />
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
-            <flux:card class=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3   ">
-                <div class="col-span-3  ">
-                    <div class="flex justify-between py-2  ">
-                        <flux:heading size="lg">Client Information</flux:heading>
-                        <flux:modal.trigger name="search-client">
-                            <flux:button icon="magnifying-glass-circle" variant="primary">Search Client</flux:button>
-                        </flux:modal.trigger>
+            <flux:card>
+                <div class="flex justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900">Client Details</h3>
+                </div>
+                <flux:separator />
+                <div class="flex flex-row gap-4 justify-end pt-4">
+                    <livewire:components.common.client-search-select />
+                    @if($client)
+                        <flux:button wire:click="clearClient" variant="danger" icon="x-mark">Clear Client
+                        </flux:button>
+                    @endif
+                </div>
+                @if($client)
+                    <div class="my-4 space-y-4">
+                        <x-common.summary-item label="Full Name" value="{{ $client->full_name }}" />
+                        <x-common.summary-item label="Email" value="{{ $client->email }}" />
+                        <x-common.summary-item label="Date of Birth" value="{{ $client->dob_formatted }}" />
+                        <x-common.summary-item label="Address" value="{{ $client->address }}" />
+                        <x-common.summary-item label="Postal Code" value="{{ $client->zip_code }}" />
                     </div>
-                    <flux:separator />
-                </div>
-                <div class="col-span-3">
-                    <flux:error name="form.clientId" />
-                </div>
-                <div class="col-span-1">
-                    <flux:label>Full Name</flux:label>
-                    <div class="text-gray-800 font-medium">{{ $client->full_name ?? '-' }}</div>
-                </div>
-                <div class="col-span-1">
-                    <flux:label>Date of Birth</flux:label>
-                    <div class="text-gray-800 font-medium">{{ $client->dob_formatted ?? '-' }}</div>
-                </div>
-                <div class="col-span-1">
-                    <flux:label>Address</flux:label>
-                    <div class="text-gray-800 font-medium">{{ $client->address ?? '-' }}</div>
-                </div>
-                <div class="col-span-1">
-                    <flux:label>Email</flux:label>
-                    <div class="text-gray-800 font-medium">{{ $client->email ?? '-' }}</div>
-                </div>
-                <div class="col-span-1">
-                    <flux:label>Postal / Zip code</flux:label>
-                    <div class="text-gray-800 font-medium">{{ $client->zip_code ?? '-' }}</div>
-                </div>
+                @else
+                    <p class="text-gray-500 italic p-4">No client selected.</p>
+                @endif
+
             </flux:card>
             <flux:card class="space-y-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div class="col-span-3">
@@ -66,8 +57,8 @@
                     <flux:error name="form.clientServiceSpecialistId" />
                 </div>
                 <div class="col-span-1">
-                    <flux:label>Recertification Date</flux:label>
-                    <flux:input type="date" wire:model="form.recertificationDate" />
+                    <flux:label>Re-Certification Date</flux:label>
+                    <flux:date-picker wire:model="form.recertificationDate" selectable-header with-today />
                     <flux:error name="form.recertificationDate" />
                 </div>
                 <div class="col-span-1">

@@ -196,7 +196,7 @@ class ContractMeal extends Form
     }
     public function loadClientServiceSpecialists()
     {
-        Log::info('Loading client service specialists for program branch ID: ' . $this->programBranchId);
+       
         $this->clientServiceSpecialists = $this->clientRepository->getClientServiceSpecialistsByProgramBranch($this->programBranchId);
     }
     public function getFiltered(string $search): Builder
