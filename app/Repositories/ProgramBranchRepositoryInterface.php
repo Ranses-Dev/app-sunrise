@@ -19,4 +19,5 @@ interface ProgramBranchRepositoryInterface
 
     public function delete(int $id): bool;
 
+    public function getHowpaBranches(): Collection;
 }

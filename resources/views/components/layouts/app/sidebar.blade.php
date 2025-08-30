@@ -5,15 +5,25 @@
     @include('partials.head')
 </head>
 
-<body class="min-h-screen bg-white dark:bg-zinc-800">
-    <flux:sidebar sticky stashable
-        class="bg-zinc-50 dark:bg-zinc-900 border-r rtl:border-r-0 rtl:border-l border-zinc-200 dark:border-zinc-700">
+<body class="min-h-screen bg-transparent">
+    <flux:sidebar sticky stashable class="bg-sky-100">
         <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
-        <flux:brand href="#" logo="{{asset('logo.png')}}" name="SunConnect" class="dark:hidden" />
-        <flux:brand href="#" logo="{{asset('logo.png')}}" name="SunConnect" class="hidden dark:flex" />
+        <div class="border-b-2 border-white  dark:border-gray-700">
+            <a wire:navigate href="{{ route('dashboard') }}">
+                <div class="  rounded-md flex flex-row items-center justify-center gap-3">
+                    <img src="{{asset('logo.png')}}" class="dark:hidden w-18" />
+                    <p class="font-thin text-blue-900 text-2xl">Sunconnect</p>
+                </div>
+            </a>
+        </div>
+
+
+
+
+        <img src="{{asset('logo.png')}}" class="hidden dark:flex" />
         <flux:navlist variant="outline">
-            <flux:navlist.item icon="home" href="{{ route('dashboard') }}" :current="request()->routeIs('dashboard')"
-                wire:navigate>
+            <flux:navlist.item class="text-gray-900" icon="home" href="{{ route('dashboard') }}"
+                :current="request()->routeIs('dashboard')" wire:navigate>
                 Dashboard
             </flux:navlist.item>
             @persist('alerts-sidebar')
@@ -56,7 +66,10 @@
             </flux:menu>
         </flux:dropdown>
     </flux:header>
+
     {{ $slot }}
+
+
     @fluxScripts
     @persist('toast')
     <flux:toast />

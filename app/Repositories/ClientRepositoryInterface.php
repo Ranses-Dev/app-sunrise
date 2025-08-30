@@ -16,7 +16,7 @@ interface ClientRepositoryInterface
     public function getAll(): Collection;
     public function findById(int $id): ?Client;
     public function findBySsn(string $ssn): ?Client;
-    public function getFiltered(string $search): Builder;
+    public function getFiltered(array $filters): Builder;
     public function create(array $data): Client;
     public function update(int $id, array $data): bool;
     public function delete(int $id): bool;
@@ -40,5 +40,9 @@ interface ClientRepositoryInterface
 
     public function isValidHowpaSsn(string $ssn, int|null $clientId): bool;
 
-    public function hasHowpaContractActive(string $date,int $clientId):bool;
+    public function hasHowpaContractActive(string $date, int $clientId): bool;
+
+    public function getHowpaClientsWithContractActive(): Collection;
+
+    public function getClientsHowpa(string|null $search = null): Builder;
 }

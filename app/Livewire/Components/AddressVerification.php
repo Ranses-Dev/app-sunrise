@@ -44,13 +44,16 @@ class AddressVerification extends Component
         }
 
         // Assuming we take the first result
-        $address = $result[0];
-        $this->street = $address['delivery_line_1'] ?? '';
-        $this->city = $address['components']['city_name'] ?? '';
-        $this->state = $address['components']['state_abbreviation'] ?? '';
-        $this->zip = $address['components']['zipcode'] ?? '';
-        $this->county = $address['metadata']['county_name'] ?? ''; // Assuming county is part of the response
 
+          // Assuming county is part of the response
+        $this->dispatch('addressVerified', [
+            'delivery_line_1' => $this->result['delivery_line_1'] ?? '',
+            'last_line' => $this->result['last_line'] ?? '',
+            'city' => $this->result['city_name'] ?? '',
+            'state' => $this->result['state_abbreviation'] ?? '',
+            'zip' => $this->result['zipcode'] ?? '',
+            'county' => $this->result['county_name'] ?? '',
+        ]);
         // Clear any previous errors
         $this->resetErrorBag('address');
     }

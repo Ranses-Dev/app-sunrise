@@ -39,6 +39,14 @@ return [
         'auth_id'  => env('SMARTY_API_AUTH_ID'),
         'auth_token' => env('SMARTY_API_AUTH_TOKEN'),
         'timeout' => env('SMARTY_API_TIMEOUT'),
+    ],
+    'programs' => [
+        'howpa_id' => env('PROGRAM_HOWPA_ID'),
+        'inspection_id' => env('PROGRAM_INSPECTIONS_ID'),
+        'meals_id' => env('PROGRAM_MEALS_ID'),
+        'rental_id' => env('PROGRAM_RENTAL_ID'),
+    ],
+    'program_branches' => [
+        'howpas_id' => env('PROGRAM_BRANCH_HOWPAS_ID'),
     ]
-
 ];

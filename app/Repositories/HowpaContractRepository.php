@@ -14,9 +14,9 @@ class HowpaContractRepository implements HowpaContractRepositoryInterface
     {
         return HowpaContract::all();
     }
-    public function getFiltered(string|null $search = null): Builder
+    public function getFiltered(array $filters): Builder
     {
-        return HowpaContract::with(['client', 'programBranch'])->search($search);
+        return HowpaContract::with(['client', 'programBranch'])->search($filters);
     }
     public function findById(int $id): ?HowpaContract
     {

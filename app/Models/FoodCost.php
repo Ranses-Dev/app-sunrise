@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use App\Traits\ConvertFormatCurrency;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Number;
+use NumberFormatter;
+use Ramsey\Uuid\Type\Decimal;
 
 class FoodCost extends Model
-{
+{   use ConvertFormatCurrency;
     protected $fillable = ['cost'];
 
     /**
@@ -30,5 +34,10 @@ class FoodCost extends Model
     public function scopeSearch($query, string|null $search = null): Builder
     {
         return empty($search) && !is_numeric($search) ? $query : $query->where('cost', '=', (float) $search);
+    }
+
+    public function getFormattedCurrencyAttribute(): string
+    {
+        return $this->convert($this->cost);
     }
 }

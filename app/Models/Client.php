@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Facades\DB;
@@ -20,7 +21,7 @@ class Client extends Model
 {
     use ImageHandler, LogsActivity;
     protected $fillable = [
-        'address',
+        'address_id',
         'city_district_id',
         'city_id',
         'client_number',
@@ -50,7 +51,7 @@ class Client extends Model
         'monthly_client_payment_portion',
         'payment_amounts',
         'ssn',
-        'zip_code',
+
     ];
     protected $casts = [
         'dob' => 'date:Y-m-d',
@@ -115,21 +116,55 @@ class Client extends Model
         return $this->belongsTo(HealthcareProviderPlan::class);
     }
 
-    public function scopeSearch(Builder $query, string|null $search): Builder
+    public function scopeSearch(Builder $query, array $filters): Builder
     {
-        return $query->when($search, function (Builder $query, string $search) {
-            $query->where(function (Builder $query) use ($search) {
-                $query->where('first_name', 'like', "%{$search}%")
+        $query->with(['legalStatus', 'identificationType', 'cityDistrict', 'countyDistrict', 'city', 'healthcareProvider', 'healthcareProviderPlan', 'howpaContracts', 'contractMeals']);
+        $query->when(filled($filters['search'] ?? null), function (Builder $q) use ($filters) {
+            $search = $filters['search'];
+            $q->where(function (Builder $qq) use ($search) {
+                $qq->where('first_name', 'like', "%{$search}%")
                     ->orWhere('last_name', 'like', "%{$search}%")
-                    ->orWhere('client_number', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhere('zip_code', 'like', "%{$search}%")
+                    ->orWhere('client_number', 'like', "%{$search}%")
                     ->orWhere('howpa_client_number', 'like', "%{$search}%");
+
                 if (preg_match('/^\d{3}-?\d{2}-?\d{4}$/', $search)) {
-                    $query->orWhere('ssn_hash', '=', hash('sha256', $search));
+                    $qq->orWhere('howpa_ssn_hash', hash('sha256', $search));
+                }
+                if (preg_match('/^\d{4}$/', $search)) {
+                    $qq->orWhere('ssn_hash', hash('sha256', $search));
                 }
             });
         });
+        $query->when(filled($filters['legalStatusId'] ?? null), function (Builder $q) use ($filters) {
+            $q->where('legal_status_id', (int) $filters['legalStatusId']);
+        });
+        $query->when(filled($filters['identificationTypeId'] ?? null), function (Builder $q) use ($filters) {
+            $q->where('identification_type_id', (int) $filters['identificationTypeId']);
+        });
+        $query->when(filled($filters['ethnicityId'] ?? null), function (Builder $q) use ($filters) {
+            $q->where('ethnicity_id', (int) $filters['ethnicityId']);
+        });
+        $query->when(filled($filters['healthcareProviderId'] ?? null), function (Builder $q) use ($filters) {
+            $q->where('healthcare_provider_id', (int) $filters['healthcareProviderId']);
+        });
+        $query->when(filled($filters['genderId'] ?? null), function (Builder $q) use ($filters) {
+            $q->where('gender_id', (int) $filters['genderId']);
+        });
+        $hasHowpa = filter_var(
+            $filters['hasHowpa'] ?? null,
+            FILTER_VALIDATE_BOOLEAN,
+            FILTER_NULL_ON_FAILURE
+        );
+
+        $hasMeals = filter_var(
+            $filters['hasMeals'] ?? null,
+            FILTER_VALIDATE_BOOLEAN,
+            FILTER_NULL_ON_FAILURE
+        );
+        $query->when($hasHowpa, fn(Builder $q) => $q->whereHas('howpaContracts'));
+        $query->when($hasMeals, fn(Builder $q) => $q->whereHas('contractMeals'));
+        return $query;
     }
     public function scopeSsn(Builder $query, string|null $ssn): Builder
     {
@@ -521,7 +556,16 @@ class Client extends Model
     }
     public function getIdentificationDataAttribute()
     {
-         $this->loadMissing('identificationType');
-         return $this->identificationType ? "{$this->identificationType->name} - {$this->identification_number}" : null;
+        $this->loadMissing('identificationType');
+        return $this->identificationType ? "{$this->identificationType->name} - {$this->identification_number}" : null;
+    }
+
+    public function inspections(): BelongsToMany
+    {
+        return $this->belongsToMany(Inspection::class, 'client_inspection');
+    }
+    public function address(): BelongsTo
+    {
+        return $this->belongsTo(Address::class);
     }
 }

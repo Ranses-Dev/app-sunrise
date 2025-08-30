@@ -39,7 +39,11 @@ class PermissionSeeder extends Seeder
             'User',
             'Howpa Contract',
             'Emergency Contact',
-            'Housing Status'
+            'Housing Status',
+            'Inspection Type',
+            'Housing Type',
+            'Inspection',
+            'Address',
         ];
         $actions = ['view any', 'view', 'create', 'update', 'delete', 'restore', 'force delete'];
         foreach ($models as $model) {

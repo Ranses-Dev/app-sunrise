@@ -32,6 +32,7 @@ class Create extends Component
         $this->form->loadFoodCosts();
         $this->form->loadProgramDeliveryCosts();
         $this->form->loadTerminationReasons();
+        $this->form->loadClientServiceSpecialists();
     }
     public function render()
     {
@@ -58,7 +59,7 @@ class Create extends Component
     #[On('selectClient')]
     public function selectClient(int $clientId)
     {
-         
+
         $this->client = $this->form->getClientById($clientId);
         $this->form->clientId = $this->client?->id;
         $this->showClientModal = false;

@@ -87,4 +87,10 @@ class Create extends Component
             $this->resetValidation('form.frequencyPayment');
         }
     }
+    
+    public function handleSelectedAddress(int $id)
+    {
+        $this->form->addressId = $id;
+        $this->form->getAddressById();
+    }
 }

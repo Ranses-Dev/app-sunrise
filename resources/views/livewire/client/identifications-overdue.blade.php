@@ -4,7 +4,7 @@
         <livewire:components.buttons.export-button @export="export" />
     </div>
     <x-common.card-filter>
-        <div class="grid   sm:grid-cols-1 md:grid-cols-5 lg:grid-cols-5 gap-2">
+
             <!-- City District Filter -->
             <div>
                 <flux:label for="city_district">City District</flux:label>
@@ -40,7 +40,7 @@
                 <flux:label for="date_from">Range Date</flux:label>
                 <flux:date-picker wire:model.live='range' mode="range" clearable />
             </div>
-        </div>
+       
     </x-common.card-filter>
     <x-common.container-table>
         <flux:table :paginate="$this->results">

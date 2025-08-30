@@ -4,8 +4,7 @@
         <livewire:components.buttons.export-button @export="export" />
     </div>
     <x-common.card-filter>
-        <div class="grid sm:grid-cols-1 md:grid-cols-5 lg:grid-cols-5 gap-2">
-            <!-- City District Filter -->
+
             <div>
                 <flux:label for="city_district">City District</flux:label>
                 <flux:select variant="listbox" clearable wire:model.live="filters.city_district_id" id="city_district">
@@ -15,6 +14,8 @@
                     @endforelse
                 </flux:select>
             </div>
+
+
             <!-- County District Filter -->
             <div>
                 <flux:label for="county_district">County District</flux:label>
@@ -40,7 +41,9 @@
                 <flux:label for="date_from">Range Date</flux:label>
                 <flux:date-picker wire:model.live='range' mode="range" clearable />
             </div>
-        </div>
+      
+
+
     </x-common.card-filter>
     <x-common.container-table>
         <flux:table :paginate="$this->results">
@@ -71,7 +74,8 @@
                             </flux:badge>
                         </flux:table.cell>
                         <flux:table.cell>
-                            <flux:button variant="primary" size="sm" icon="pencil-square" wire:click="edit({{ $result->id }})" />
+                            <flux:button variant="primary" size="sm" icon="pencil-square"
+                                wire:click="edit({{ $result->id }})" />
                         </flux:table.cell>
 
 

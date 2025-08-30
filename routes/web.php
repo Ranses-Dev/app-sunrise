@@ -129,7 +129,15 @@ Route::middleware(['throttle:60,1'])->group(function () {
         Route::get('howpa-contracts/{id}/edit', \App\Livewire\HowpaContract\Edit::class)->name('howpa.contracts.edit');
         Route::get('howpa-contracts/{id}/show', \App\Livewire\HowpaContract\Show::class)->name('howpa.contracts.show');
         //
-});
+        //Address
+        Route::get('addresses', \App\Livewire\Address\Index::class)->name('addresses.index');
+        Route::get('addresses/create', \App\Livewire\Address\Create::class)->name('addresses.create');
+        Route::get('addresses/{id}/edit', \App\Livewire\Address\Edit::class)->name('addresses.edit');
+        //Inspections
+        Route::get('inspections', \App\Livewire\Inspection\Index::class)->name('inspections.index');
+        Route::get('inspections/create', \App\Livewire\Inspection\Create::class)->name('inspections.create');
+        Route::get('inspections/{id}/edit', \App\Livewire\Inspection\Edit::class)->name('inspections.edit');
+    });
     Route::prefix('exports')->as('exports.')->group(function () {
         //Exports
         Route::prefix('clients')->as('clients.')->group(function () {
@@ -138,7 +146,11 @@ Route::middleware(['throttle:60,1'])->group(function () {
             Route::get('recertifications-due', \App\Http\Controllers\Exports\RecertificationsDue::class)->name('recertifications-due');
             Route::get('recertifications-overdue', \App\Http\Controllers\Exports\RecertificationsOverdue::class)->name('recertifications-overdue');
         });
-    });
+        Route::get('inspections', \App\Http\Controllers\Exports\InspectionExport::class)->name('inspections');
+        Route::get('contract-meals', \App\Http\Controllers\Exports\ContractMealExport::class)->name('contract-meals');
+        Route::get('howpa-contracts', \App\Http\Controllers\Exports\HowpaContractExport::class)->name('howpa-contracts');
+
+});
 });
 
 require __DIR__ . '/auth.php';

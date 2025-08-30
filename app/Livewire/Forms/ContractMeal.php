@@ -14,8 +14,10 @@ use App\Repositories\TerminationReasonRepositoryInterface;
 use App\Repositories\ContractMealRepositoryInterface;
 use App\Repositories\ClientRepositoryInterface;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Computed;
 
 class ContractMeal extends Form
 {
@@ -31,6 +33,12 @@ class ContractMeal extends Form
     public ?string $recertificationDate = null;
     public ?string $notes = null;
     public ?string $code = null;
+
+    public array $filters = [
+        'search',
+        'clientServiceSpecialistId',
+        'programBranchId'
+    ];
 
 
     public Collection $programBranches;
@@ -196,28 +204,34 @@ class ContractMeal extends Form
     }
     public function loadClientServiceSpecialists()
     {
-       
-        $this->clientServiceSpecialists = $this->clientRepository->getClientServiceSpecialistsByProgramBranch($this->programBranchId);
+        $this->clientServiceSpecialists = $this->clientRepository->getClientServiceSpecialistsByProgram(config('services.programs.meals_id'));
     }
     public function getFiltered(string $search): Builder
     {
-        return $this->contractMealRepository->getFiltered($search)->with([
+        return $this->contractMealRepository->getFiltered($this->filters)->with([
             'client',
             'mealContractType',
             'deliveryCost',
             'foodCost',
             'programDeliveryCost',
-            'terminationReason'
+            'terminationReason',
+            'clientServiceSpecialist'
         ]);
     }
 
-    public function getClients(string|null $search = null): Builder
+    public function getClients(array $filters = []): Builder
     {
-        return $this->clientRepository->getFiltered($search);
+        return $this->clientRepository->getFiltered($filters);
     }
 
     public function getClientById(int $clientId): Client|null
     {
         return $this->clientRepository->findById($clientId);
+    }
+
+    #[Computed]
+    public function results(): LengthAwarePaginator
+    {
+        return $this->contractMealRepository->getFiltered($this->filters)->paginate(pageName: 'contract-meals-page');
     }
 }

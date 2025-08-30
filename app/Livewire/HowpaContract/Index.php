@@ -9,6 +9,8 @@ use Livewire\WithPagination;
 
 use App\Livewire\Forms\HowpaContract as FormsHowpaContract;
 use Flux\Flux;
+use Illuminate\Support\Facades\Log;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 
 #[Title('List Howpa Contracts')]
@@ -21,6 +23,13 @@ class Index extends Component
     {
         return view('livewire.howpa-contract.index');
     }
+
+    public function mount()
+    {
+        $this->form->getProgramBranches();
+        $this->form->getClientServiceSpecialists();
+    }
+
 
     public function create()
     {
@@ -48,5 +57,17 @@ class Index extends Component
             Flux::toast(variant: 'success', position: 'top-right', text: __(CrudMessages::DELETE_SUCCESS->value));
         }
         $this->form->reset('id');
+    }
+
+    #[On('reset-filters')]
+    public function resetFilters()
+    {
+        $this->form->reset('filters');
+    }
+
+    public function export()
+    {
+        Log::info([$this->form->filters]);
+        $this->redirect(route('exports.howpa-contracts', ["filters" => $this->form->filters]));
     }
 }

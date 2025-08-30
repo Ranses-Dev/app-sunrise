@@ -21,7 +21,6 @@ use Illuminate\Support\Facades\Log;
 
 class HowpaContract extends Form
 {
-    public  ?string $search = null;
     public ?int $id = null;
     public ?int $clientId = null;
     public ?int $emergencyContactOneId = null;
@@ -58,6 +57,15 @@ class HowpaContract extends Form
     public   $clientServiceSpecialists = null;
     public ?int $clientServiceSpecialistId = null;
     public ?string $howpaSsn = null;
+
+    public array $filters = [
+        'programBranchId' => null,
+        'clientId' => null,
+        'clientServiceSpecialistId' => null,
+        'rangeDate' => null,
+        'rangeReCertificationDate' => null,
+
+    ];
     public ?Collection $emergencyContacts = null;
     public ?int $emergencyContactId = null;
     public ?Collection $programBranches = null;
@@ -300,7 +308,7 @@ class HowpaContract extends Form
     #[Computed]
     public function result(): LengthAwarePaginator
     {
-        return $this->howpaContractRepository->getFiltered($this->search)->paginate(pageName: 'howpa_contracts');
+        return $this->howpaContractRepository->getFiltered($this->filters)->paginate(pageName: 'howpa_contracts');
     }
     public function findClientBySsn(string $ssn): ?Client
     {
@@ -381,7 +389,6 @@ class HowpaContract extends Form
     }
     public function getClientServiceSpecialists()
     {
-
-        $this->clientServiceSpecialists = $this->clientRepository->getClientServiceSpecialistsByProgramBranch($this->programBranchId);
+        $this->clientServiceSpecialists = $this->clientRepository->getClientServiceSpecialistsByProgram((int)config('services.programs.howpa_id'));
     }
 }

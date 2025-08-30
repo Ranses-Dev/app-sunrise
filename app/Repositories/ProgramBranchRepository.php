@@ -4,7 +4,7 @@ namespace App\Repositories;
 
 use App\Models\ProgramBranch;
 use Illuminate\Database\Eloquent\Collection;
-
+use Illuminate\Support\Facades\Log;
 
 class ProgramBranchRepository implements ProgramBranchRepositoryInterface
 {
@@ -35,5 +35,12 @@ class ProgramBranchRepository implements ProgramBranchRepositoryInterface
             return $programBranch->delete();
         }
         return false;
+    }
+
+    public function getHowpaBranches(): Collection
+    {
+        return ProgramBranch::whereHas('program', function ($q) {
+            $q->where('id', (int)config('services.programs.inspection_id'));
+        })->get();
     }
 }

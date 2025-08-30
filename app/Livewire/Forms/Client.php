@@ -4,9 +4,13 @@ namespace App\Livewire\Forms;
 
 
 use App\Enums\PaymentFrequency;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Form;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\RequiredIf;
+use Illuminate\Support\Carbon;
+use Livewire\WithFileUploads;
+use Illuminate\Support\Str;
 use App\Repositories\ClientRepositoryInterface as ClientRepository;
 use App\Repositories\LegalStatusRepositoryInterface as LegalStatusRepository;
 use App\Repositories\IdentificationTypeRepositoryInterface as IdentificationTypeRepository;
@@ -18,11 +22,9 @@ use App\Repositories\HealthcareProviderPlanRepositoryInterface as HealthcareProv
 use App\Repositories\GenderRepositoryInterface as GenderRepository;
 use App\Repositories\EthnicityRepositoryInterface as EthnicityRepository;
 use App\Repositories\HousingStatusRepositoryInterface as HousingStatusRepository;
+use App\Repositories\AddressRepositoryInterface as AddressRepository;
 use App\Traits\ImageHandler;
-use Illuminate\Support\Carbon;
-use Livewire\WithFileUploads;
-use Illuminate\Support\Str;
-
+use Livewire\Attributes\Computed;
 
 class Client extends Form
 {
@@ -31,7 +33,6 @@ class Client extends Form
     public ?string $firstName = null;
     public ?string $lastName = null;
     public ?string $dob = null;
-
     public ?string $effectiveDate = null;
     public ?string $ssn = null;
     public ?int $legalStatusId = null;
@@ -41,8 +42,6 @@ class Client extends Form
     public ?string $identificationPictureBase64 = null;
     public  $identificationPicture = null;
     public ?string $identificationPictureName = "";
-    public ?string $address = null;
-    public ?string $zipCode = null;
     public ?int $cityDistrictId = null;
     public ?int $countyDistrictId = null;
     public ?int $cityId = null;
@@ -66,6 +65,7 @@ class Client extends Form
     protected GenderRepository $genderRepository;
     protected EthnicityRepository $ethnicityRepository;
     protected HousingStatusRepository $housingStatusRepository;
+    protected AddressRepository $addressRepository;
     public $statuses = null;
     public $identificationTypes = null;
     public $cityDistricts = null;
@@ -77,12 +77,31 @@ class Client extends Form
     public $ethnicities = null;
     public $housingStatuses = null;
 
+    //For Address
+    public ?int $addressId = null;
+    public ?string $addressFormatted = null;
+    public ?string $addressPostalCode = null;
+    public ?string $addressCountyName = null;
+    public ?string $addressCityName = null;
+    public ?string $addressStateAbbreviation = null;
+
     //For Payments
     public bool $editAddPayment = false;
     public array $paymentAmounts = [];
     public  float|null $paymentAmount = 0;
     public string|null $frequencyPayment = null;
 
+    //Filters
+    public array $filters = [
+        'search' => '',
+        'legalStatusId' => '',
+        'identificationTypeId' => '',
+        'ethnicityId' => '',
+        'healthcareProviderId' => '',
+        'genderId' => '',
+        'hasHowpa' => false,
+        'hasMeals' => false,
+    ];
 
     public function boot()
     {
@@ -97,6 +116,7 @@ class Client extends Form
         $this->genderRepository = app(GenderRepository::class);
         $this->ethnicityRepository = app(EthnicityRepository::class);
         $this->housingStatusRepository = app(HousingStatusRepository::class);
+        $this->addressRepository = app(AddressRepository::class);
     }
 
     public function rules(): array
@@ -140,8 +160,6 @@ class Client extends Form
                 'string'
 
             ],
-            'address' => ['required', 'string', 'max:255'],
-            'zipCode' => ['required', 'string', 'regex:/^\d{5}(-\d{4})?$/', 'max:10'],
             'cityDistrictId' => ['nullable', 'exists:city_districts,id'],
             'countyDistrictId' => ['nullable', Rule::requiredIf(fn(): bool => empty($this->cityDistrictId)), 'exists:county_districts,id'],
             'cityId' => [
@@ -159,13 +177,13 @@ class Client extends Form
                 'exists:healthcare_provider_plans,id',
             ],
             'housingStatusId' => ['nullable', 'exists:housing_statuses,id'],
+            'addressId' => ['required', 'exists:addresses,id'],
 
         ];
     }
     public function messages(): array
     {
         return [
-
             'identificationNumber.unique' => 'The identification number has already been taken.',
             'email.unique' => 'The email has already been taken.',
             'identificationPictureBase64.required' => 'The identification picture is required.',
@@ -184,7 +202,8 @@ class Client extends Form
             'effectiveDate.after_or_equal' => 'The effective date must be after or equal to the date of birth.',
             'effectiveDate.before' => 'The effective date must be before today.',
             'housingStatusId.exists' => 'The selected housing status is invalid.',
-
+            'addressId.exists' => 'The selected address is invalid.',
+            'addressId.required' => 'The address is required.',
         ];
     }
 
@@ -202,8 +221,6 @@ class Client extends Form
                 $this->identificationTypeId = $result->identification_type_id;
                 $this->identificationNumber = $result->identification_number;
                 $this->identificationExpirationDate = $result->identification_expiration_date ? Carbon::parse($result->identification_expiration_date)->format('Y-m-d') : null;
-                $this->address = $result->address;
-                $this->zipCode = $result->zip_code;
                 $this->cityDistrictId = $result->city_district_id;
                 $this->countyDistrictId = $result->county_district_id;
                 $this->cityId = $result->city_id;
@@ -222,7 +239,9 @@ class Client extends Form
                 $this->clientNumber = $result->client_number;
                 $this->getHousingStatuses();
                 $this->housingStatusId = $result->housing_status_id;
-                $this->effectiveDate = $result->effective_date? Carbon::parse($result->effective_date)->format('Y-m-d') : null;
+                $this->effectiveDate = $result->effective_date ? Carbon::parse($result->effective_date)->format('Y-m-d') : null;
+                $this->addressId = $result->address_id;
+                $this->getAddressById();
             }
         }
     }
@@ -233,7 +252,7 @@ class Client extends Form
         $uuid = Str::uuid();
         $this->validate($this->rules(), $this->messages());
         $data = [
-            'address' => $this->address,
+            'address_id' => $this->addressId,
             'city_district_id' => $this->cityDistrictId,
             'city_id' => $this->cityId,
             'county_district_id' => $this->countyDistrictId,
@@ -254,7 +273,7 @@ class Client extends Form
             'legal_status_id' => $this->legalStatusId,
             'payment_amounts' => $this->paymentAmounts,
             'ssn' => $this->ssn,
-            'zip_code' => $this->zipCode,
+
         ];
 
         if ($this->id) {
@@ -287,7 +306,7 @@ class Client extends Form
             $this->clientRepository->create($data);
         }
         $this->reset([
-            'address',
+            'addressId',
             'cityDistrictId',
             'cityId',
             'countyDistrictId',
@@ -375,5 +394,24 @@ class Client extends Form
     public function getHousingStatuses()
     {
         $this->housingStatuses = $this->housingStatusRepository->getAll();
+    }
+
+    public function getAddressById()
+    {
+        $this->reset(['addressFormatted', 'addressPostalCode', 'addressCountyName', 'addressCityName', 'stateAbbreviation']);
+        if ($this->addressId && $address = $this->addressRepository->findById($this->addressId)) {
+            $this->addressFormatted = $address->address_formatted;
+            $this->addressPostalCode = $address->postal_code;
+            $this->addressCountyName = $address->county_name;
+            $this->addressCityName = $address->city;
+            $this->addressStateAbbreviation = $address->state_abbreviation;
+        }
+    }
+
+    #[Computed]
+
+    public function results(): LengthAwarePaginator
+    {
+        return $this->clientRepository->getFiltered($this->filters)->paginate(pageName: 'clients-page');
     }
 }

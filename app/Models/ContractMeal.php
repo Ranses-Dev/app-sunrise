@@ -26,9 +26,24 @@ class ContractMeal extends Model
         'is_active' => 'boolean',
         'recertification_date' => 'date',
     ];
-    public function scopeSearch(Builder $query, string|null $search): Builder
+    public function scopeSearch(Builder $query, array $filters): Builder
     {
-        return empty($search) ? $query : $query->where('notes', 'like', "$search");
+        if (isset($filters['search']) && filled($filters['search'])) {
+            $search = $filters['search'];
+            $query->with('client');
+            $query->where(function ($query) use ($search) {
+                $query->where('notes', 'like', "%$search%")
+                    ->orWhere('code', 'like', "%$search%")
+                    ->orWhereHas('client', function ($query) use ($search) {
+                        $query->where('first_name', 'like', "%$search%")
+                         ->orWhere('last_name', 'like', "%$search%");
+                    });
+            });
+        }
+        if (isset($filters['programBranchId']) && filled($filters['programBranchId'])) {
+            $query->where('program_branch_id', $filters['programBranchId']);
+        }
+        return $query;
     }
     public function client(): BelongsTo
     {

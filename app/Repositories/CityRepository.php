@@ -23,17 +23,17 @@ class CityRepository implements CityRepositoryInterface
     }
     public function update(int $id, array $data): bool
     {
-        $identificationType = $this->findById($id);
-        if ($identificationType) {
-            return $identificationType->update($data);
+        $city = $this->findById($id);
+        if ($city) {
+            return $city->update($data);
         }
         return false;
     }
     public function delete(int $id): bool
     {
-        $identificationType = $this->findById($id);
-        if ($identificationType) {
-            return $identificationType->delete();
+        $city = $this->findById($id);
+        if ($city) {
+            return $city->delete();
         }
         return false;
     }

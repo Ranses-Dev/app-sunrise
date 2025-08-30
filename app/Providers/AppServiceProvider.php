@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Repositories\AddressRepository;
+use App\Repositories\AddressRepositoryInterface;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Notifications\Messages\MailMessage;
 use App\Repositories\AttachmentTypeRepository;
@@ -40,12 +42,18 @@ use App\Repositories\HouseholdRelationTypeRepository;
 use App\Repositories\HouseholdRelationTypeRepositoryInterface;
 use App\Repositories\HousingStatusRepository;
 use App\Repositories\HousingStatusRepositoryInterface;
+use App\Repositories\HousingTypeRepository;
+use App\Repositories\HousingTypeRepositoryInterface;
 use App\Repositories\HowpaContractRepository;
 use App\Repositories\HowpaContractRepositoryInterface;
 use App\Repositories\IdentificationTypeRepository;
 use App\Repositories\IdentificationTypeRepositoryInterface;
 use App\Repositories\IncomeLimitRepository;
 use App\Repositories\IncomeLimitRepositoryInterface;
+use App\Repositories\InspectionRepository;
+use App\Repositories\InspectionRepositoryInterface;
+use App\Repositories\InspectionTypeRepository;
+use App\Repositories\InspectionTypeRepositoryInterface;
 use App\Repositories\LegalStatusRepository;
 use App\Repositories\LegalStatusRepositoryInterface;
 use App\Repositories\MealContractStatisticsRepository;
@@ -68,6 +76,8 @@ use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
+
+
 
     /**
      * Register any application services.
@@ -186,12 +196,17 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(HousingStatusRepositoryInterface::class, HousingStatusRepository::class);
         $this->app->bind(SmartyApiRepositoryInterface::class, SmartyApiRepository::class);
+        $this->app->bind(InspectionTypeRepositoryInterface::class, InspectionTypeRepository::class);
+        $this->app->bind(HousingTypeRepositoryInterface::class, HousingTypeRepository::class);
+        $this->app->bind(InspectionRepositoryInterface::class, InspectionRepository::class);
+        $this->app->bind(AddressRepositoryInterface::class, AddressRepository::class);
     }
     /**
      * Bootstrap any application services.
      */
     public function boot(): void
     {
+        \Illuminate\Support\Number::useLocale(config('app.locale'));
         /* URL::forceHttps(
             $this->app->environment(['staging', 'production', 'demo'])
                 && !$this->app->environment(['testing', 'local'])

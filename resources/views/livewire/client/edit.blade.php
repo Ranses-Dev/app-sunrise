@@ -28,6 +28,25 @@
                                 @endforeach
                             @endif
                         </flux:select>
+                        <flux:select wire:model.live="form.healthcareProviderId" variant="listbox" clearable searchable
+                            label="Healthcare Provider" filter>
+                            @foreach ($this->form->healthcareProviders as $healthcareProvider)
+                                <flux:select.option value="{{ $healthcareProvider->id }}"
+                                    wire:key="{{ $healthcareProvider->id }}">
+                                    {{ $healthcareProvider->name }}
+                                </flux:select.option>
+                            @endforeach
+                        </flux:select>
+
+                        <flux:select wire:model.live="form.healthcareProviderPlanId" variant="listbox" clearable
+                            searchable label="Healthcare Provider Plan" filter>
+                            @foreach ($this->form->healthcareProviderPlans as $healthcareProviderPlan)
+                                <flux:select.option value="{{ $healthcareProviderPlan->id }}"
+                                    wire:key="{{ $healthcareProviderPlan->id }}">
+                                    {{ $healthcareProviderPlan->name }}
+                                </flux:select.option>
+                            @endforeach
+                        </flux:select>
                     </div>
                 </div>
 
@@ -56,9 +75,9 @@
                             @endforeach
                         </flux:select>
                         <flux:input uppercase wire:model="form.identificationNumber" label="Identification Number" />
-                         
-                        <flux:date-picker wire:model="form.identificationExpirationDate" type="date" label="Identification Expiration Date"
-                            selectable-header with-today />
+
+                        <flux:date-picker wire:model="form.identificationExpirationDate" type="date"
+                            label="Identification Expiration Date" selectable-header with-today />
                     </div>
                     <div class="mt-4">
                         <flux:tab.group>
@@ -163,50 +182,6 @@
                                 </flux:select.option>
                             @endforeach
                         </flux:select>
-
-                    </div>
-                </div>
-
-
-                {{-- Healthcare --}}
-                <div class="bg-white shadow rounded-2xl p-6">
-                    <div class="mb-4">
-                        <h2 class="text-lg font-semibold">Healthcare Info</h2>
-                        <flux:separator />
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <flux:select wire:model.live="form.healthcareProviderId" variant="listbox" clearable searchable
-                            label="Healthcare Provider" filter>
-                            @foreach ($this->form->healthcareProviders as $healthcareProvider)
-                                <flux:select.option value="{{ $healthcareProvider->id }}"
-                                    wire:key="{{ $healthcareProvider->id }}">
-                                    {{ $healthcareProvider->name }}
-                                </flux:select.option>
-                            @endforeach
-                        </flux:select>
-
-                        <flux:select wire:model.live="form.healthcareProviderPlanId" variant="listbox" clearable
-                            searchable label="Healthcare Provider Plan" filter>
-                            @foreach ($this->form->healthcareProviderPlans as $healthcareProviderPlan)
-                                <flux:select.option value="{{ $healthcareProviderPlan->id }}"
-                                    wire:key="{{ $healthcareProviderPlan->id }}">
-                                    {{ $healthcareProviderPlan->name }}
-                                </flux:select.option>
-                            @endforeach
-                        </flux:select>
-                    </div>
-                </div>
-                {{-- Address Info --}}
-                <div class="bg-white shadow rounded-2xl p-6 col-span-1">
-                    <div class="mb-4">
-                        <h2 class="text-lg font-semibold">Address</h2>
-                        <flux:separator />
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="col-span-1 md:col-span-2">
-                            <flux:input wire:model="form.address" class="col-span-2" label="Address" />
-                        </div>
-                        <flux:input wire:model="form.zipCode" class="col-span-2" label="Zipcode" />
                         <flux:select wire:model.live="form.cityDistrictId" variant="listbox" clearable searchable
                             label="City District" filter>
                             @foreach ($this->form->cityDistricts as $cityDistrict)
@@ -231,8 +206,33 @@
                                 </flux:select.option>
                             @endforeach
                         </flux:select>
-
                     </div>
+                </div>
+                {{-- Address Info --}}
+                <div class="bg-white shadow rounded-2xl p-6 col-span-1">
+                    <div class="mb-4">
+                        <h2 class="text-lg font-semibold">Address</h2>
+                        <flux:separator />
+                    </div>
+
+                        <div class="grid grid-cols-4 gap-4 items-center">
+                            <div class="col-span-3 space-y-4">
+                                <x-common.summary-item label="Address" value="{{ $this->form->addressFormatted }}" />
+                                <x-common.summary-item label="Postal Code"
+                                    value="{{ $this->form->addressPostalCode }}" />
+                                <x-common.summary-item label="County" value="{{ $this->form->addressCountyName }}" />
+                                <x-common.summary-item label="City" value="{{ $this->form->addressCityName }}" />
+                                <x-common.summary-item label="State"
+                                    value="{{ $this->form->addressStateAbbreviation }}" />
+                            </div>
+                            <div>
+                                 <livewire:components.common.address-search-select @selected="handleSelectedAddress($event.detail.addressId)" />
+                            </div>
+                        </div>
+                        <flux:error name="form.addressId" />
+
+
+
                 </div>
             </div>
             {{-- Action Buttons --}}

@@ -27,18 +27,27 @@ class SmartyApiRepository implements SmartyApiRepositoryInterface
             'zipcode' => $zipcode,
             'auth-id'    => config('services.smarty.auth_id'),
             'auth-token' => config('services.smarty.auth_token'),
+            'candidates' => 1,
         ], fn($value) => !is_null($value) && $value !== '');
 
 
         try {
-            Log::info('Sending request to Smarty API with query: ' . json_encode($query));
             $response = $client->get('', ['query' => $query]);
             $status = $response->getStatusCode();
-            Log::info('Smarty API response status: ' . $status);
             if ($status > 400) {
                 return false;
             }
-            return json_decode($response->getBody()->getContents(), true)??[];
+            $data = json_decode($response->getBody()->getContents(), true) ?? [];
+            return [
+                'delivery_line_1' => $data[0]['delivery_line_1'],
+                'last_line' => $data[0]['last_line'],
+                'city' => $data[0]['components']['city_name'] ?? null,
+                'state' => $data[0]['components']['state_abbreviation'] ?? null,
+                'county_name' => $data[0]['metadata']['county_name'] ?? null,
+                'state_abbreviation' => $data[0]['components']['state_abbreviation'] ?? null,
+                'postal_code' => $data[0]['components']['zipcode'] ?? null,
+                'street_name' => $data[0]['components']['street_name'] ?? null,
+            ];
         } catch (GuzzleException $e) {
             Log::error('Smarty API request failed: ' . $e->getMessage());
             return false;

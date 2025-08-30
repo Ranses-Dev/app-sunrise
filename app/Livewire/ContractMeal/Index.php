@@ -21,6 +21,12 @@ class Index extends Component
     public ?int $idToDelete = null;
     public ContractMealForm $form;
 
+    public function mount()
+    {
+        $this->form->loadClientServiceSpecialists();
+        $this->form->loadProgramBranches();
+    }
+
     public function render()
     {
         return view('livewire.contract-meal.index');
@@ -54,9 +60,14 @@ class Index extends Component
         }
         $this->reset('idToDelete');
     }
-    #[Computed]
-    public function results(): LengthAwarePaginator
+
+    public function export()
     {
-        return $this->form->getFiltered($this->search)->paginate(pageName: 'contract-meals-page');
+        $this->redirect(url:route('exports.contract-meals', ["filters" => $this->form->filters]));
+    }
+    #[On('reset-filters')]
+    public function resetFilters()
+    {
+        $this->form->reset('filters');
     }
 }

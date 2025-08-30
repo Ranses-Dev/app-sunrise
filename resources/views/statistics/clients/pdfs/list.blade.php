@@ -5,6 +5,7 @@
                 <tr>
                     <th>Full Name</th>
                     <th>DOB</th>
+                    <th>Legal Status</th>
                     <th>Identification</th>
                     <th>Age</th>
                     <th>Email</th>
@@ -19,13 +20,14 @@
                     <tr>
                         <td>{{ $client->full_name }}</td>
                         <td>{{ $client->dob->format('m/d/Y') }}</td>
+                        <td>{{ $client->legalStatus?->name }}</td>
                         <td>{{ $client->full_identification_data }}</td>
                         <td>{{ $client->age }}</td>
                         <td>{{ $client->email }}</td>
                         <td>{{ $client->client_number }}</td>
                         <td>{{ $client->full_healthcare_provider }}</td>
                         <td>{{ $client->monthly_client_payment_portion }}</td>
-                        <td>{{ $client->full_address }}</td>
+                        <td>{{ $client->address?->address_formatted }}</td>
                     </tr>
                 @endforeach
             </tbody>
@@ -34,5 +36,3 @@
 
 
 </x-layouts.statistics>
-
-

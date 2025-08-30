@@ -1,18 +1,14 @@
+
 <div>
-    <flux:button wire:click="handleShowModal"   variant="primary"
-        icon:trailing="magnifying-glass-circle">
-        Search Client
+    <flux:button wire:click="handleShowModal" variant="primary" icon:trailing="magnifying-glass-circle">
+        {{ $label }}
     </flux:button>
     <flux:modal name="search-client" wire:model='showModal' class="w-full h-[90vh] max-w-7xl overflow-y-auto">
         <div class="space-y-6">
-            <div>
-                <flux:heading size="lg">Clients</flux:heading>
-                <flux:text class="mt-2">Search and select client.</flux:text>
-                <flux:separator />
-            </div>
+            <x-page-heading title="Clients" />
             <div class="space-y-4 w-full">
                 <div class="w-1/2">
-                    <flux:input wire:model.live.debounce1000="searchClient" icon="magnifying-glass"
+                    <flux:input wire:model.live.debounce1000="filters.search" icon="magnifying-glass"
                         placeholder="Search ..." />
                 </div>
                 <flux:table :paginate="$this->results">
@@ -35,7 +31,7 @@
                             <flux:table.row :key="$result->id">
                                 <flux:table.cell>
                                     <flux:button wire:click="selectClient({{ $result->id }})" variant="primary"
-                                          icon="user-plus">
+                                        icon="user-plus">
                                         Select</flux:button>
                                 </flux:table.cell>
                                 <flux:table.cell>{{ $result->first_name }}</flux:table.cell>
@@ -54,7 +50,6 @@
                                 </flux:table.cell>
                                 <flux:table.cell>{{ $result->email }}</flux:table.cell>
                                 <flux:table.cell>{{ $result->zip_code }}</flux:table.cell>
-
                             </flux:table.row>
                         @endforeach
                     </flux:table.rows>

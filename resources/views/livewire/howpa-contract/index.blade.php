@@ -1,12 +1,37 @@
 <div class="space-y-4">
-    <x-page-heading title="Howpa Contracts List" />
-    <div class="flex justify-between">
-        <flux:input wire:model.live.debounce1000="search" class="input-search" icon="magnifying-glass"
-            placeholder="Search ..." />
+    <x-page-heading title="HOPWA Contracts" />
+    <div class="flex justify-end">
+
         @can('create', \App\Models\HowpaContract::class)
-            <flux:button wire:click="create" variant="primary" icon="plus">Create</flux:button>
+            <flux:button.group>
+                <livewire:components.buttons.create-button @create="create" />
+                <livewire:components.buttons.export-button @export="export" />
+            </flux:button.group>
         @endcan
     </div>
+    <x-common.card-filter>
+        <flux:input wire:model.live.debounce1000="form.filters.search" label="Search" icon="magnifying-glass"
+            placeholder="Search ..." />
+        <flux:select clearable wire:model.live='form.filters.programBranchId' variant="listbox" label="Program Branch"
+            searchable placeholder="Program Branch...">
+            @if ($this->form->programBranches)
+                @foreach ($this->form->programBranches as $branch)
+                    <flux:select.option value="{{ $branch->id }}">{{ $branch->name }}</flux:select.option>
+                @endforeach
+            @endif
+        </flux:select>
+        <flux:select clearable wire:model.live='form.filters.clientServiceSpecialistId' variant="listbox"
+            label="Client Service Specialist" searchable placeholder="Client Service Specialist...">
+            @if ($this->form->clientServiceSpecialists)
+                @foreach ($this->form->clientServiceSpecialists as $specialist)
+                    <flux:select.option value="{{ $specialist->id }}">{{ $specialist->name }}</flux:select.option>
+                @endforeach
+            @endif
+        </flux:select>
+        <flux:date-picker clearable label="Date" mode="range" wire:model.live.debounce1000ms='form.filters.rangeDate' />
+        <flux:date-picker clearable label="Re-Certification Date" mode="range"
+            wire:model.live.debounce1000ms='form.filters.rangeReCertificationDate' />
+    </x-common.card-filter>
     <x-common.container-table>
         <flux:table :paginate="$this->form->result()">
             <flux:table.columns>
@@ -28,7 +53,9 @@
                         <flux:table.cell>{{ $result->date?->format('m/d/Y') }}</flux:table.cell>
                         <flux:table.cell>{{ $result->re_certification_date?->format('m/d/Y') }}</flux:table.cell>
                         <flux:table.cell>
-                            <flux:badge variant="solid" color="{{ $result->is_active ? 'green' : 'red' }}">{{ $result->is_active ? 'Active' : 'Inactive' }}</flux:badge>
+                            <flux:badge variant="solid" color="{{ $result->is_active ? 'green' : 'red' }}">
+                                {{ $result->is_active ? 'Active' : 'Inactive' }}
+                            </flux:badge>
                         </flux:table.cell>
                         <flux:table.cell>
                             <flux:dropdown>

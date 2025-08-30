@@ -22,10 +22,20 @@ class Index extends Component
     public string $search = '';
     public ?int $idToDelete = null;
     public ClientForm $form;
+    public function mount()
+    {
+        $this->form->getLegalStatuses();
+        $this->form->getIdentificationTypes();
+        $this->form->getEthnicities();
+        $this->form->getHealthcareProviders();
+        $this->form->getGenders();
+    }
     public function render()
     {
         return view('livewire.client.index');
     }
+
+
     public function create()
     {
         return $this->redirect(route('clients.create'), navigate: true);
@@ -54,14 +64,9 @@ class Index extends Component
         }
         $this->reset('idToDelete');
     }
-    #[Computed]
-    public function results(): LengthAwarePaginator
-    {
-        return Client::search($this->search)
-            ->paginate(pageName: 'clients-page');
-    }
+
     public function exportClientListPdf()
     {
-        return $this->redirect(url: route('statistics.clients.pdfs.list'), navigate: false);
+        return $this->redirect(url: route('statistics.clients.pdfs.list', ["filters" => $this->form->filters]), navigate: false);
     }
 }

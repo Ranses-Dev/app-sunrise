@@ -28,8 +28,7 @@ return new class extends Migration {
             $table->string('identification_number')->unique();
             $table->date('identification_expiration_date')->nullable();
             $table->string('identification_picture');
-            $table->string('address');
-            $table->string('zip_code');
+            $table->foreignId('address_id')->constrained('addresses')->cascadeOnDelete();
             $table->unsignedBigInteger('city_district_id')->nullable();
             $table->unsignedBigInteger('county_district_id')->nullable();
             $table->unsignedBigInteger('city_id')->nullable();

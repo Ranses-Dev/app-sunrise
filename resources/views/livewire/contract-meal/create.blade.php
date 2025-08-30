@@ -1,6 +1,6 @@
 <div>
     <form wire:submit.prevent="store" class="space-y-6">
-        <x-page-heading title="Create Contract Meal" />
+        <x-page-heading title="New Meal Contract" />
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
             <flux:card>
                 <div class="flex justify-between">
@@ -19,8 +19,8 @@
                         <x-common.summary-item label="Full Name" value="{{ $client->full_name }}" />
                         <x-common.summary-item label="Email" value="{{ $client->email }}" />
                         <x-common.summary-item label="Date of Birth" value="{{ $client->dob_formatted }}" />
-                        <x-common.summary-item label="Address" value="{{ $client->address }}" />
-                        <x-common.summary-item label="Postal Code" value="{{ $client->zip_code }}" />
+                        <x-common.summary-item label="Address" value="{{ $client->address?->address_formatted }}" />
+                        <x-common.summary-item label="Postal Code" value="{{ $client->address?->postal_code }}" />
                     </div>
                 @else
                     <p class="text-gray-500 italic p-4">No client selected.</p>

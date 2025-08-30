@@ -12,7 +12,7 @@ interface HowpaContractRepositoryInterface
 {
 
     public function getAll(): Collection;
-    public function getFiltered(string|null $search = null): Builder;
+    public function getFiltered(array $filters): Builder;
     public function findById(int $id): ?HowpaContract;
 
     public function create(array $data): HowpaContract;

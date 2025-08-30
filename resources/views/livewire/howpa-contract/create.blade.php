@@ -1,5 +1,5 @@
 <div class="space-y-4">
-    <x-page-heading title="Create Contract Howpa" />
+    <x-page-heading title="New HOPWA Contract" />
     <div class="grid  grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <form wire:submit.prevent="create" class="col-span-3 grid grid-cols-3 gap-4">
             <flux:card class="space-y-4">
@@ -22,7 +22,7 @@
                         <div class="grid grid-cols-3 gap-4 col-span-3">
                             <x-common.summary-item label="Full Name" value="{{ $this->form->client->full_name }}" />
                             <x-common.summary-item label="Client Number" value="{{ $this->form->client->client_number }}" />
-                            <x-common.summary-item label="Address" value="{{ $this->form->client->address }}" />
+                            <x-common.summary-item label="Address" value="{{ $this->form->client->address?->address_formatted }}" />
                             <div class="grid grid-cols-2 col-span-3 gap-4">
                                 <flux:input type="text" label="SSN" mask="999-99-9999" wire:model='form.howpaSsn' />
                                 <flux:input type="text" label="Howpa Client Number" wire:model='form.howpaClientNumber' />

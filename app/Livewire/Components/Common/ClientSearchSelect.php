@@ -5,15 +5,24 @@ namespace App\Livewire\Components\Common;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Component;
 use App\Repositories\ClientRepositoryInterface;
-use Illuminate\Container\Attributes\Log;
-use Illuminate\Support\Facades\Log as FacadesLog;
 use Livewire\Attributes\Computed;
+use Livewire\Features\SupportPagination\WithoutUrlPagination;
+use Livewire\WithPagination;
 
 class ClientSearchSelect extends Component
 {
+    use WithPagination, WithoutUrlPagination;
     protected ClientRepositoryInterface $clientRepository;
     public bool $showModal = false;
-    public string $searchClient = '';
+    public array $filters = [
+        'search' => ''
+    ];
+    public string $label = '';
+
+    public function mount(string $label = 'Search Client'): void
+    {
+        $this->label = $label;
+    }
     public function boot()
     {
         $this->clientRepository = app(ClientRepositoryInterface::class);
@@ -25,7 +34,7 @@ class ClientSearchSelect extends Component
     #[Computed]
     public function results(): LengthAwarePaginator
     {
-        return $this->clientRepository->getFiltered($this->searchClient)->paginate(pageName: 'clients-contracts', perPage: 10);
+        return $this->clientRepository->getFiltered($this->filters)->paginate(pageName: 'clients-search-select', perPage: 10);
     }
 
     public function handleShowModal()
@@ -36,6 +45,6 @@ class ClientSearchSelect extends Component
     public function selectClient(int $clientId)
     {
         $this->dispatch('selectClient',  $clientId);
-        $this->reset(['showModal', 'searchClient']);
+        $this->reset(['showModal', 'filters']);
     }
 }

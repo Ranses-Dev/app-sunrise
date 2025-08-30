@@ -36,7 +36,9 @@ class DatabaseSeeder extends Seeder
             DeliveryCostSeeder::class,
             FoodCostSeeder::class,
             ProgramDeliveryCostSeeder::class,
-            HousingStatusSeeder::class
+            HousingStatusSeeder::class,
+            InspectionTypeSeeder::class,
+            HousingTypeSeeder::class
         ]);
         $usersData = [
 

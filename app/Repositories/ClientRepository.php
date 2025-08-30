@@ -3,11 +3,13 @@
 namespace App\Repositories;
 
 use App\Models\Client;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as CollectionData;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ClientRepository implements ClientRepositoryInterface
@@ -18,15 +20,15 @@ class ClientRepository implements ClientRepositoryInterface
     }
     public function findById(int $id): ?Client
     {
-        return Client::find($id);
+        return Client::with('address')->find($id);
     }
     public function findBySsn(string $ssn): ?Client
     {
         return Client::ssn($ssn)->first();
     }
-    public function getFiltered(string $search): Builder
+    public function getFiltered(array $filters): Builder
     {
-        return Client::search($search);
+        return Client::search($filters);
     }
     public function create(array $data): Client
     {
@@ -145,13 +147,10 @@ class ClientRepository implements ClientRepositoryInterface
 
     public function getClientServiceSpecialistsByProgram(?int $programId): CollectionData
     {
-        return DB::table('users')
-            ->join('program_user', 'users.id', '=', 'program_user.user_id')
-            ->join('programs', 'program_user.program_id', '=', 'programs.id')
-            ->where('programs.id', '=', $programId)
-            ->select('users.id', 'users.name')
-            ->distinct()
-            ->get();
+        
+        return User::whereHas('programs', function ($q) use ($programId) {
+            $q->where('programs.id', $programId);
+        })->get();
     }
     public function getClientServiceSpecialistsByProgramBranch(?int $programBranchId): CollectionData
     {
@@ -181,5 +180,21 @@ class ClientRepository implements ClientRepositoryInterface
     public function hasHowpaContractActive(string $date, int $clientId): bool
     {
         return Client::clientHasHowpaContractActive($date, $clientId);
+    }
+
+    public function getHowpaClientsWithContractActive(): Collection
+    {
+        return Client::with('howpaContracts')
+            ->whereHas('howpaContracts', function ($query) {
+                $query->whereBeforeToday('date')
+                    ->whereAfterToday('re_certification_date');
+            })
+            ->get();
+    }
+    public function getClientsHowpa(string|null $search = null): Builder
+    {
+        return Client::whereHas('howpaContracts')
+            ->search($search);
+
     }
 }

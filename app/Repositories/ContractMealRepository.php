@@ -14,9 +14,9 @@ class ContractMealRepository implements ContractMealRepositoryInterface
     {
         return ContractMeal::all();
     }
-    public function getFiltered(string $search): Builder
+    public function getFiltered(array $filters): Builder
     {
-        return ContractMeal::search($search);
+        return ContractMeal::search($filters);
     }
 
     public function findById(int $id): ?ContractMeal

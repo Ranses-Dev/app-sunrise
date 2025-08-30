@@ -74,15 +74,39 @@ class HowpaContract extends Model
     {
         return $this->belongsTo(EmergencyContact::class, 'emergency_contact_two_id');
     }
-    public function scopeSearch(Builder $query, string|null $search = null): Builder
+    public function scopeSearch(Builder $query, array $filters): Builder
     {
-        if ($search) {
-            return $query->whereHas('client', function (Builder $q) use ($search) {
-                $q->where('ssn', 'like', "%$search%")
-                    ->orWhere('first_name', 'like', "%$search%")
-                    ->orWhere('last_name', 'like', "%$search%");
+        if (isset($filters['search']) && filled($filters['search'])) {
+            $query->whereHas('client', function (Builder $q) use ($filters) {
+                $q->where('ssn', 'like', "%{$filters['search']}%")
+                    ->orWhere('first_name', 'like', "%{$filters['search']}%")
+                    ->orWhere('last_name', 'like', "%{$filters['search']}%")
+                    ->orWhere('howpa_client_number', 'like', "%{$filters['search']}%");
+                if (preg_match('/^\d{3}-?\d{2}-?\d{4}$/', $filters['search'])) {
+                    $q->orWhere('howpa_ssn_hash', hash('sha256', $filters['search']));
+                }
+                if (preg_match('/^\d{4}$/', $filters['search'])) {
+                    $q->orWhere('ssn_hash', hash('sha256', $filters['search']));
+                }
             });
         }
+        if (isset($filters['programBranchId']) && filled($filters['programBranchId'])) {
+            $query->where('program_branch_id', $filters['programBranchId']);
+        }
+        if (isset($filters['clientServiceSpecialistId']) && filled($filters['clientServiceSpecialistId'])) {
+            $query->where('client_service_specialist_id', $filters['clientServiceSpecialistId']);
+        }
+        if (!empty($filters['rangeDate'])) {
+            $start = $filters['rangeDate']['start'] ?? null;
+            $end   = $filters['rangeDate']['end'] ?? null;
+            $query->whereBetween('date', [$start, $end]);
+        }
+        if (!empty($filters['rangeReCertificationDate'])) {
+            $start = $filters['rangeReCertificationDate']['start'] ?? null;
+            $end   = $filters['rangeReCertificationDate']['end'] ?? null;
+            $query->whereBetween('re_certification_date', [$start, $end]);
+        }
+
         return $query;
     }
 

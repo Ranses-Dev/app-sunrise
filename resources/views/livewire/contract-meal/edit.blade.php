@@ -1,6 +1,6 @@
 <div>
     <form wire:submit.prevent="update" class="space-y-6">
-        <x-page-heading title="Edit Contract Meal" />
+        <x-page-heading title="New Meal Contract" />
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
             <flux:card>
                 <div class="flex justify-between">
@@ -19,8 +19,8 @@
                         <x-common.summary-item label="Full Name" value="{{ $client->full_name }}" />
                         <x-common.summary-item label="Email" value="{{ $client->email }}" />
                         <x-common.summary-item label="Date of Birth" value="{{ $client->dob_formatted }}" />
-                        <x-common.summary-item label="Address" value="{{ $client->address }}" />
-                        <x-common.summary-item label="Postal Code" value="{{ $client->zip_code }}" />
+                        <x-common.summary-item label="Address" value="{{ $client->address?->address_formatted }}" />
+                        <x-common.summary-item label="Postal Code" value="{{ $client->address?->postal_code }}" />
                     </div>
                 @else
                     <p class="text-gray-500 italic p-4">No client selected.</p>
@@ -127,68 +127,5 @@
         </div>
     </form>
 
-    <flux:modal name="search-client" wire:model='showClientModal' class="w-full h-[90vh] max-w-7xl overflow-y-auto">
-        <div class="space-y-6">
-            <div>
-                <flux:heading size="lg">Clients</flux:heading>
-                <flux:text class="mt-2">Search and select client.</flux:text>
-                <flux:separator />
-            </div>
-            <div class="space-y-4 w-full">
-                <flux:heading>Clients</flux:heading>
-                <div class="w-1/2">
-                    <flux:input wire:model.live.debounce1000="searchClient" icon="magnifying-glass"
-                        placeholder="Search ..." />
-                </div>
-                <flux:table :paginate="$this->resultClients">
-                    <flux:table.columns>
-                        <flux:table.column></flux:table.column>
-                        <flux:table.column>First Name </flux:table.column>
-                        <flux:table.column>Last Name</flux:table.column>
-                        <flux:table.column>Client Number</flux:table.column>
-                        <flux:table.column>DOB</flux:table.column>
-                        <flux:table.column>Age</flux:table.column>
-                        <flux:table.column>Income</flux:table.column>
-                        <flux:table.column>Total Income</flux:table.column>
-                        <flux:table.column>Households</flux:table.column>
-                        <flux:table.column>Income Category (%)</flux:table.column>
-
-                        <flux:table.column>Email</flux:table.column>
-                        <flux:table.column>Address</flux:table.column>
-                        <flux:table.column>Zipcode</flux:table.column>
-                    </flux:table.columns>
-                    <flux:table.rows>
-                        @foreach ($this->resultClients as $result)
-                            <flux:table.row :key="$result->id">
-                                <flux:table.cell>
-                                    <flux:button wire:click="selectClient({{ $result->id }})" variant="ghost"
-                                        icon="user-plus">
-                                        Select</flux:button>
-                                </flux:table.cell>
-                                <flux:table.cell>{{ $result->first_name }}</flux:table.cell>
-                                <flux:table.cell>{{ $result->last_name }}</flux:table.cell>
-                                <flux:table.cell>{{ $result->client_number }}</flux:table.cell>
-                                <flux:table.cell>{{ $result->dob->format('m/d/Y') }}</flux:table.cell>
-                                <flux:table.cell>{{ $result->age }}</flux:table.cell>
-                                <flux:table.cell>{{ $result->income }}</flux:table.cell>
-                                <flux:table.cell>{{ $result->total_income }}</flux:table.cell>
-                                <flux:table.cell>{{ $result->household_total }}</flux:table.cell>
-                                <flux:table.cell> @if ($result->income_category)
-                                    <flux:badge color="green">{{"$result->income_category %" }}</flux:badge>
-                                @else
-                                        <flux:badge color="red">N/A</flux:badge>
-                                    @endif
-                                </flux:table.cell>
-
-                                <flux:table.cell>{{ $result->email }}</flux:table.cell>
-                                <flux:table.cell>{{ $result->address }}</flux:table.cell>
-                                <flux:table.cell>{{ $result->zip_code }}</flux:table.cell>
-
-                            </flux:table.row>
-                        @endforeach
-                    </flux:table.rows>
-                </flux:table>
-            </div>
-        </div>
-    </flux:modal>
+    
 </div>

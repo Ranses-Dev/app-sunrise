@@ -31,6 +31,7 @@ class Edit extends Component
         $this->form->loadFoodCosts();
         $this->form->loadProgramDeliveryCosts();
         $this->form->loadTerminationReasons();
+        $this->form->loadClientServiceSpecialists();
         $this->form->setData($id);
         $this->client = $this->form->getClientById($this->form->clientId);
     }
@@ -49,11 +50,7 @@ class Edit extends Component
         return $this->redirect(route('contract-meals.index'), navigate: true);
     }
 
-    #[Computed]
-    public function resultClients(): LengthAwarePaginator
-    {
-        return   $this->form->getClients($this->searchClient)->paginate(pageName: 'clients-contracts', perPage: 10);
-    }
+   
     #[On('selectClient')]
     public function selectClient(int $clientId)
     {
