@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Exports;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Repositories\ContractMealRepositoryInterface as ContractMealRepository;
-use Illuminate\Support\Facades\Log;
+use Spatie\Browsershot\Browsershot;
 use Spatie\LaravelPdf\Facades\Pdf;
 use Spatie\LaravelPdf\Enums\Format;
 use \Spatie\LaravelPdf\Enums\Orientation;
@@ -23,13 +23,13 @@ class ContractMealExport extends Controller
         $data = $this->repository->getFiltered($request->input('filters', []))->get();
         return Pdf::format(Format::Letter)
             ->orientation(Orientation::Landscape)
-            /* ->withBrowsershot(function (Browsershot $browsershot) {
+            ->withBrowsershot(function (Browsershot $browsershot) {
                 $browsershot
                     ->setNodeBinary('/usr/bin/node')
                     ->setNpmBinary('/usr/bin/npm')
                     ->setChromePath('/usr/bin/chromium-browser')
                     ->setOption('args', ['--no-sandbox']);
-            })*/
+            })
             ->margins(10, 10, 10, 10)
             ->download('contract_meals.pdf')
             ->view('exports.pages.contract-meals', compact('data'))

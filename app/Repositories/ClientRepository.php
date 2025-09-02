@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Client;
+use App\Models\Program;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -97,14 +98,24 @@ class ClientRepository implements ClientRepositoryInterface
     }
     public function getClientsByPrograms(): array
     {
-        return DB::table('programs')
-            ->join('contract_meals', 'contract_meals.program_id', '=', 'programs.id')
-            ->join('clients', 'contract_meals.client_id', '=', 'clients.id')
-            ->select('programs.name as program', DB::raw('COUNT(DISTINCT contract_meals.client_id) as total'))
-            ->groupBy('programs.id', 'programs.name')
-            ->orderByDesc('total')
+        return Program::withCount([
+            'contractMeals as clients_meals_count' => function ($query) {
+                $query->select(DB::raw('count(distinct client_id)'));
+            },
+            'contractHowpas as clients_howpa_count' => function ($query) {
+                $query->select(DB::raw('count(distinct client_id)'));
+            },
+        ])
             ->get()
-            ->map(fn($row) => ['program' => $row->program, 'total' => $row->total])
+            ->map(function ($program) {
+                return [
+                    'id' => $program->id,
+                    'name' => $program->name,
+                    'clients_meals_count' => $program->clients_meals_count,
+                    'clients_howpa_count' => $program->clients_howpa_count,
+                    'total_clients' => $program->clients_meals_count + $program->clients_howpa_count,
+                ];
+            })
             ->toArray();
     }
     public function certificationsOverdue(?array $filters): Builder
@@ -147,7 +158,7 @@ class ClientRepository implements ClientRepositoryInterface
 
     public function getClientServiceSpecialistsByProgram(?int $programId): CollectionData
     {
-        
+
         return User::whereHas('programs', function ($q) use ($programId) {
             $q->where('programs.id', $programId);
         })->get();
@@ -195,6 +206,5 @@ class ClientRepository implements ClientRepositoryInterface
     {
         return Client::whereHas('howpaContracts')
             ->search($search);
-
     }
 }

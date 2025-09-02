@@ -10,11 +10,12 @@ use Spatie\LaravelPdf\Facades\Pdf;
 use Spatie\LaravelPdf\Enums\Format;
 use \Spatie\LaravelPdf\Enums\Orientation;
 use App\Repositories\InspectionRepositoryInterface as InspectionRepository;
+use Spatie\LaravelPdf\PdfBuilder;
 
 class InspectionExport extends Controller
 {
     public function __construct(protected InspectionRepository $inspectionRepository) {}
-    public function __invoke(Request $request)
+    public function __invoke(Request $request):PdfBuilder
     {
 
             $queryParameters = $request->query();
@@ -22,13 +23,13 @@ class InspectionExport extends Controller
 
             return Pdf::format(Format::Letter)
                 ->orientation(Orientation::Landscape)
-                /* ->withBrowsershot(function (Browsershot $browsershot) {
+                ->withBrowsershot(function (Browsershot $browsershot) {
                 $browsershot
                     ->setNodeBinary('/usr/bin/node')
                     ->setNpmBinary('/usr/bin/npm')
                     ->setChromePath('/usr/bin/chromium-browser')
                     ->setOption('args', ['--no-sandbox']);
-            })*/
+            })
                 ->margins(10, 10, 10, 10)
                 ->download('inspections.pdf')
                 ->view('exports.pages.inspections', compact('inspections'))

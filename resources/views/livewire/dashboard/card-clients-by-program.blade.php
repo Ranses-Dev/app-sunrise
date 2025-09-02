@@ -24,8 +24,15 @@
                 @foreach($this->clientsByProgram() as $index => $item)
                     <tr
                         class="{{ $index % 2 === 0 ? 'bg-blue-50' : 'bg-white' }} hover:bg-yellow-50 transition-colors duration-150">
-                        <td class="py-1.5 px-2 font-medium">{{ $item['program'] }}</td>
-                        <td class="py-1.5 px-2 text-right">{{ $item['total'] }}</td>
+                        <td class="py-1.5 px-2 font-medium">{{ $item['name'] }}</td>
+                         @if ($item['name'] === 'HOWPA')
+                            <td class="py-1.5 px-2 text-right">{{ $item['clients_howpa_count'] }}</td>
+                         @elseif ($item['name'] === 'MEALS')
+                            <td class="py-1.5 px-2 text-right">{{ $item['clients_meals_count'] }}</td>
+                         @else
+                        <td></td>
+                         @endif
+
                     </tr>
                 @endforeach
             </tbody>

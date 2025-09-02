@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Program extends Model
 {
@@ -30,5 +31,15 @@ class Program extends Model
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'program_user', 'program_id', 'user_id');
+    }
+
+    public function contractMeals(): HasManyThrough
+    {
+        return $this->hasManyThrough(ContractMeal::class, ProgramBranch::class);
+    }
+
+    public function contractHowpas(): HasManyThrough
+    {
+        return $this->hasManyThrough(HowpaContract::class, ProgramBranch::class);
     }
 }
