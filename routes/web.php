@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 use Spatie\LaravelPdf\Enums\Format;
 use Spatie\LaravelPdf\Enums\Orientation;
 use Spatie\LaravelPdf\Facades\Pdf;
+use App\Livewire\Components\Dashboard;
 
 
 
@@ -24,7 +25,7 @@ Route::middleware(['throttle:60,1'])->group(function () {
             Route::get('password', Password::class)->name('password');
             Route::get('two-factor', TwoFactor::class)->name('two-factor');
         });
-        Route::view('dashboard', 'dashboard')
+        Route::get('dashboard', Dashboard::class)
             ->name('dashboard');
         Route::redirect('settings', 'settings/profile');
         Route::get('settings/profile', Profile::class)->name('settings.profile');
@@ -149,8 +150,7 @@ Route::middleware(['throttle:60,1'])->group(function () {
         Route::get('inspections', \App\Http\Controllers\Exports\InspectionExport::class)->name('inspections');
         Route::get('contract-meals', \App\Http\Controllers\Exports\ContractMealExport::class)->name('contract-meals');
         Route::get('howpa-contracts', \App\Http\Controllers\Exports\HowpaContractExport::class)->name('howpa-contracts');
-
-});
+    });
 });
 
 require __DIR__ . '/auth.php';

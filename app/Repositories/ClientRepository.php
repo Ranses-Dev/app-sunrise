@@ -207,4 +207,56 @@ class ClientRepository implements ClientRepositoryInterface
         return Client::whereHas('howpaContracts')
             ->search($search);
     }
+
+    public function existsHowpaClientNumber(string $howpaClientNumber, ?int $clientId = null): bool
+    {
+        return  Client::where('howpa_client_number', $howpaClientNumber)
+            ->where('id', '!=', $clientId)->exists();
+    }
+    public function getClientsAliveCount(): int
+    {
+        return Client::where('is_deceased', false)->count();
+    }
+    public function getClientsIdentificationsDueCount(): int
+    {
+        return Client::whereBetween('identification_expiration_date', [now(), now()->addMonths(3)])
+            ->whereHas('legalStatus', function ($query) {
+                $query->whereRaw('LOWER(name) != ?', ['citizen']);
+            })->count();
+    }
+    public function getClientsIdentificationsOverdueCount(): int
+    {
+        return Client::where('identification_expiration_date', '<', now())
+            ->whereHas('legalStatus', function ($query) {
+                $query->whereRaw('LOWER(name) != ?', ['citizen']);
+            })->count();
+    }
+    public function getClientsCertificationsDueCount(): int
+    {
+        return Client::whereHas('contractMeals', function ($query) {
+            $query->whereBetween('recertification_date', [now(), now()->addMonths(3)]);
+        })->orWhereHas('howpaContracts', function ($query) {
+            $query->whereBetween('re_certification_date', [now(), now()->addMonths(3)]);
+        })->count();
+    }
+    public function getClientsCertificationsOverdueCount(): int
+    {
+        return Client::whereHas('contractMeals', function ($query) {
+            $query->where('recertification_date', '<', now());
+        })->orWhereHas('howpaContracts', function ($query) {
+            $query->where('re_certification_date', '<', now());
+        })->count();
+    }
+    public function clientExistsByIdentification(int $identificationTypeId, string $identificationNumber, int|null $ignoreId): bool
+    {
+        if (filled($identificationTypeId) && filled($identificationNumber)) {
+            $query = Client::where('identification_type_id', $identificationTypeId)
+                ->where('identification_number', $identificationNumber);
+            if ($ignoreId) {
+                $query->where('id', '!=', $ignoreId);
+            }
+            return $query->exists();
+        }
+        return false;
+    }
 }

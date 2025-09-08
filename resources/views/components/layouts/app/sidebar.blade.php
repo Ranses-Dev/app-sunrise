@@ -26,14 +26,7 @@
                 :current="request()->routeIs('dashboard')" wire:navigate>
                 Dashboard
             </flux:navlist.item>
-            @persist('alerts-sidebar')
-            <flux:navlist.group expandable :expanded="false" heading="Alerts">
-                <livewire:components.badge-identifications-due />
-                <livewire:components.badge-identifications-overdue />
-                <livewire:components.badge-certifications-due>
-                    <livewire:components.badge-certifications-overdue>
-            </flux:navlist.group>
-            @endpersist
+         
 
             <x-layouts.app.menu.items />
         </flux:navlist>

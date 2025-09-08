@@ -50,6 +50,8 @@ use App\Repositories\IdentificationTypeRepository;
 use App\Repositories\IdentificationTypeRepositoryInterface;
 use App\Repositories\IncomeLimitRepository;
 use App\Repositories\IncomeLimitRepositoryInterface;
+use App\Repositories\IncomeTypeRepository;
+use App\Repositories\IncomeTypeRepositoryInterface;
 use App\Repositories\InspectionRepository;
 use App\Repositories\InspectionRepositoryInterface;
 use App\Repositories\InspectionTypeRepository;
@@ -193,13 +195,13 @@ class AppServiceProvider extends ServiceProvider
         );
         $this->app->bind(HowpaContractRepositoryInterface::class, HowpaContractRepository::class);
         $this->app->bind(EmergencyContactRepositoryInterface::class, EmergencyContactRepository::class);
-
         $this->app->bind(HousingStatusRepositoryInterface::class, HousingStatusRepository::class);
         $this->app->bind(SmartyApiRepositoryInterface::class, SmartyApiRepository::class);
         $this->app->bind(InspectionTypeRepositoryInterface::class, InspectionTypeRepository::class);
         $this->app->bind(HousingTypeRepositoryInterface::class, HousingTypeRepository::class);
         $this->app->bind(InspectionRepositoryInterface::class, InspectionRepository::class);
         $this->app->bind(AddressRepositoryInterface::class, AddressRepository::class);
+        $this->app->bind(IncomeTypeRepositoryInterface::class, IncomeTypeRepository::class);
     }
     /**
      * Bootstrap any application services.

@@ -13,11 +13,12 @@ use App\Repositories\ClientRepositoryInterface;
 use App\Repositories\CityRepositoryInterface;
 use App\Repositories\ClientPhoneNumberRepositoryInterface;
 use App\Repositories\EmergencyContactRepositoryInterface;
+use App\Repositories\IncomeTypeRepositoryInterface;
 use App\Models\Client;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as SupportCollection;
 use App\Models\EmergencyContact;
-use Illuminate\Support\Facades\Log;
+
 
 class HowpaContract extends Form
 {
@@ -33,7 +34,7 @@ class HowpaContract extends Form
     public ?Collection $cities = null;
     public ?string $date = null;
     public ?string $reCertificationDate = null;
-
+    public ?string $enrollmentDay = null;
     public ?int $numberBedroomsReq = null;
     public ?int $numberBedroomsApproved = null;
     public ?string $recentLivingSituation = null;
@@ -55,8 +56,11 @@ class HowpaContract extends Form
     public bool $currentlyReceivingOtherAid = false;
     public bool $agreedStatements = false;
     public   $clientServiceSpecialists = null;
+    public  $incomeTypes = null;
+    public ?int $incomeTypeId = null;
     public ?int $clientServiceSpecialistId = null;
     public ?string $howpaSsn = null;
+    public bool $isActive = true;
 
     public array $filters = [
         'programBranchId' => null,
@@ -64,7 +68,8 @@ class HowpaContract extends Form
         'clientServiceSpecialistId' => null,
         'rangeDate' => null,
         'rangeReCertificationDate' => null,
-
+        'rangeEnrollmentDay' => null,
+        'isActive' => true,
     ];
     public ?Collection $emergencyContacts = null;
     public ?int $emergencyContactId = null;
@@ -77,6 +82,7 @@ class HowpaContract extends Form
     protected CityRepositoryInterface $cityRepository;
     protected ClientPhoneNumberRepositoryInterface $clientPhoneNumberRepository;
     protected EmergencyContactRepositoryInterface $emergencyContactRepository;
+    protected IncomeTypeRepositoryInterface $incomeTypeRepository;
     public function boot()
     {
         $this->howpaContractRepository = app(HowpaContractRepositoryInterface::class);
@@ -84,6 +90,7 @@ class HowpaContract extends Form
         $this->cityRepository = app(CityRepositoryInterface::class);
         $this->clientPhoneNumberRepository = app(ClientPhoneNumberRepositoryInterface::class);
         $this->emergencyContactRepository = app(EmergencyContactRepositoryInterface::class);
+        $this->incomeTypeRepository = app(IncomeTypeRepositoryInterface::class);
     }
     public function rules()
     {
@@ -133,12 +140,19 @@ class HowpaContract extends Form
             'agreedStatements' => 'boolean',
             'emergencyContactOneId' => 'nullable|exists:emergency_contacts,id',
             'emergencyContactTwoId' => 'nullable|exists:emergency_contacts,id',
-            'howpaClientNumber' => ['nullable', 'string', Rule::unique('clients', 'howpa_client_number')->ignore($this->id)],
+            'howpaClientNumber' => ['nullable', 'string', function ($attribute, $value, $fail) {
+                if ($value && $this->clientRepository->existsHowpaClientNumber($value, $this->clientId)) {
+                    $fail('The HOWPA client number has already been taken.');
+                }
+            }],
             'howpaSsn' => ['required', 'string', 'regex:/^\d{3}-\d{2}-\d{4}$/', function ($attribute, $value, $fail) {
-                if (!$this->clientRepository->isValidHowpaSsn($value, $this->id)) {
+                if (!$this->clientRepository->isValidHowpaSsn($value, $this->clientId)) {
                     $fail('The SSN is invalid.');
                 }
             }],
+            'enrollmentDay' => ['required', 'date'],
+            'isActive' => 'boolean',
+            'incomeTypeId' => 'required|exists:income_types,id',
         ];
     }
     public function messages(): array
@@ -200,6 +214,8 @@ class HowpaContract extends Form
             'emergencyContactTwoId.exists' => 'Selected emergency contact two does not exist.',
 
             'clientId.exists' => 'Selected client does not exist.',
+            'enrollmentDay.required' => 'Enrollment day is required.',
+            'enrollmentDay.date' => 'Enrollment day must be a valid date.',
 
 
         ];
@@ -251,6 +267,10 @@ class HowpaContract extends Form
                 $this->getEmergencyContactOne();
                 $this->emergencyContactTwoId = $result->emergency_contact_two_id;
                 $this->getEmergencyContactTwo();
+                $this->enrollmentDay = $result->enrollment_day?->format('Y-m-d');
+                $this->isActive = (bool)$result->is_active;
+                $this->getIncomeTypes();
+                $this->incomeTypeId = $result->client?->income_type_id;
             }
         }
     }
@@ -287,7 +307,11 @@ class HowpaContract extends Form
             'agreed_statements' => $this->agreedStatements,
             'emergency_contact_one_id' => $this->emergencyContactOneId,
             'emergency_contact_two_id' => $this->emergencyContactTwoId,
+            'enrollment_day' => $this->enrollmentDay,
+            'is_active' => $this->isActive,
+
         ];
+
         if ($this->id) {
             $this->howpaContractRepository->update($this->id, $data);
         } else {
@@ -296,6 +320,7 @@ class HowpaContract extends Form
         $this->clientRepository->update($this->clientId, [
             'howpa_client_number' => $this->howpaClientNumber,
             'howpa_ssn' => $this->howpaSsn,
+            'income_type_id' => $this->incomeTypeId,
         ]);
         $this->reset();
     }
@@ -322,6 +347,7 @@ class HowpaContract extends Form
         $this->getCities();
         $this->getClientPhoneNumbers();
         $this->getEmergencyContacts();
+        $this->getIncomeTypes();
         return $this->client;
     }
 
@@ -334,6 +360,7 @@ class HowpaContract extends Form
     {
         $this->reset(['clientPhoneNumberId', 'clientPhoneNumbers']);
         if ($this->clientId) {
+
             $this->clientPhoneNumbers = $this->clientPhoneNumberRepository->getAllByClientId($this->clientId);
         }
     }
@@ -390,5 +417,9 @@ class HowpaContract extends Form
     public function getClientServiceSpecialists()
     {
         $this->clientServiceSpecialists = $this->clientRepository->getClientServiceSpecialistsByProgram((int)config('services.programs.howpa_id'));
+    }
+    public function getIncomeTypes()
+    {
+        $this->incomeTypes = $this->incomeTypeRepository->getAll();
     }
 }

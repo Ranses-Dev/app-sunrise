@@ -24,7 +24,7 @@
                         <td>{{ $contractMeal->foodCost?->formatted_currency }}</td>
                         <td>{{ $contractMeal->deliveryCost?->formatted_currency }}</td>
                         <td>{{ $contractMeal->programDeliveryCost?->formatted_currency }}</td>
-                        <td>{{ $contractMeal->isActive ? 'Yes' : 'No' }}</td>
+                        <td>{{ $contractMeal->is_active ? 'Yes' : 'No' }}</td>
                         <td>{{ $contractMeal->recertification_date?->format('m-d-Y') }}</td>
 
                     </tr>

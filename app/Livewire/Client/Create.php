@@ -28,6 +28,7 @@ class Create extends Component
         $this->form->getGenders();
         $this->form->getEthnicities();
         $this->form->getHousingStatuses();
+        $this->form->getIncomeTypes();
     }
     public function render()
     {
@@ -87,7 +88,7 @@ class Create extends Component
             $this->resetValidation('form.frequencyPayment');
         }
     }
-    
+
     public function handleSelectedAddress(int $id)
     {
         $this->form->addressId = $id;

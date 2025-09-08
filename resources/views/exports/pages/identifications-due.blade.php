@@ -11,6 +11,8 @@
                     <th>Legal Status</th>
                     <th>Identification</th>
                     <th>ID. Expiration Date</th>
+                    <th>Address</th>
+
                 </tr>
             </thead>
             <tbody>
@@ -21,14 +23,14 @@
                         <td>{{ $client->age }}</td>
                         <td>{{ $client->email }}</td>
                         <td>{{ $client->client_number }}</td>
-                        <td>{{ $client->legal_status_name }}</td>
+                        <td>{{ $client->legalStatus?->name }}</td>
                         <td>{{ $client->identification_data }}</td>
                         <td>
-                            <flux:badge variant="solid" size="sm" color="red">
+                            <strong>
                                 {{ $client->identification_expiration_date?->format('m/d/Y') }}
-                            </flux:badge>
+                            </strong>
                         </td>
-
+                        <td>{{ $client->address?->address_formatted }}</td>
                     </tr>
                 @endforeach
             </tbody>

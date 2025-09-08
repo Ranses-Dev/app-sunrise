@@ -105,6 +105,15 @@ class User extends Authenticatable  implements FilamentUser, MustVerifyEmail, Ha
     {
         return $this->hasMany(ContractMeal::class, 'client_service_specialist_id');
     }
+    public function contractHowpas(): HasMany
+    {
+        return $this->hasMany(HowpaContract::class, 'client_service_specialist_id');
+    }
+
+    public function inspections(): HasMany
+    {
+        return $this->hasMany(Inspection::class, 'housing_inspector_id');
+    }
 
     public function isAdmin(): bool
     {

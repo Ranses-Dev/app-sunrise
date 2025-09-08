@@ -23,4 +23,6 @@ interface HealthcareProviderRepositoryInterface
     public function linkHealthCareProviderPlan(int $healthCareProviderId, int $planId): bool;
     public function unlinkHealthCareProviderPlan(int $healthCareProviderId, int $planId): bool;
     public function hasPlans(int $id): bool;
+
+    public function getClientsByHealthcareProvider(): array;
 }

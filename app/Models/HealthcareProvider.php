@@ -23,4 +23,9 @@ class HealthcareProvider extends Model
     {
         return $this->belongsToMany(HealthcareProviderPlan::class);
     }
+
+    public function clients(): HasMany
+    {
+        return $this->hasMany(Client::class);
+    }
 }

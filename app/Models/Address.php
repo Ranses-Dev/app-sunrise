@@ -44,38 +44,65 @@ class Address extends Model
         $postalCode = $nz($filters['postalCode'] ?? null);
         $countyName = $nz($filters['countyName'] ?? null);
 
-
-
-
-        return  $query->when(
-            $deliveryLine1,
-            fn($q) =>
-            $q->where(function ($qq) use ($deliveryLine1) {
+        if ($deliveryLine1) {
+            $query->where(function ($qq) use ($deliveryLine1) {
                 $qq->whereRaw('LOWER(delivery_line_1) LIKE ?', ["%{$deliveryLine1}%"])
                     ->orWhereRaw('LOWER(last_line)        LIKE ?', ["%{$deliveryLine1}%"]);
-            })
-        )->when(
-            $streetName,
-            fn($q) =>
-            $q->whereRaw('LOWER(street_name) LIKE ?', ['%' . strtolower($streetName) . '%'])
-        )->when(
-            $city,
-            fn($q) =>
-            $q->whereRaw('LOWER(city) LIKE ?', ['%' . strtolower($city) . '%'])
-        )->when(
-            $stateAbbreviation,
-            fn($q) =>
-            $q->whereRaw('LOWER(state_abbreviation) LIKE ?', ['%' . strtolower($stateAbbreviation) . '%'])
-        )->when(
-            $postalCode,
-            fn($q) =>
-            $q->whereRaw('LOWER(postal_code) LIKE ?', ['%' . strtolower($postalCode) . '%'])
-        )->when(
-            $countyName,
-            fn($q) =>
-            $q->whereRaw('LOWER(county_name) LIKE ?', ['%' . strtolower($countyName) . '%'])
-        );
+            });
+        }
+        if ($streetName) {
+            $query->whereRaw('LOWER(street_name) LIKE ?', ["%{$streetName}%"]);
+        }
+        if ($city) {
+            $query->whereRaw('LOWER(city) LIKE ?', ["%{$city}%"]);
+        }
+        if ($stateAbbreviation) {
+            $query->whereRaw('LOWER(state_abbreviation) LIKE ?', ["%{$stateAbbreviation}%"]);
+        }
+        if ($postalCode) {
+            $query->whereRaw('LOWER(postal_code) LIKE ?', ["%{$postalCode}%"]);
+        }
+        if ($countyName) {
+            $query->whereRaw('LOWER(county_name) LIKE ?', ["%{$countyName}%"]);
+        }
+
+        return $query;
     }
+public function scopeVerify(Builder $query, array $filters = []): Builder
+    {
+        $nz = fn($v) => is_string($v) ? trim($v) : $v;
+        $deliveryLine1 = $nz($filters['delivery_line_1'] ?? null);
+        $lastLine = $nz($filters['last_line'] ?? null);
+        $streetName = $nz($filters['street_name'] ?? null);
+        $city = $nz($filters['city'] ?? null);
+        $stateAbbreviation = $nz($filters['state_abbreviation'] ?? null);
+        $postalCode = $nz($filters['postal_code'] ?? null);
+        $countyName = $nz($filters['county_name'] ?? null);
+        if ($deliveryLine1) {
+            $query->whereRaw('LOWER(delivery_line_1) = ?', [strtolower($deliveryLine1)]);
+        }
+        if ($lastLine) {
+            $query->whereRaw('LOWER(last_line) = ?', [strtolower($lastLine)]);
+        }
+        if ($streetName) {
+            $query->whereRaw('LOWER(street_name) = ?', [strtolower($streetName)]);
+        }
+        if ($city) {
+            $query->whereRaw('LOWER(city) = ?', [strtolower($city)]);
+        }
+        if ($stateAbbreviation) {
+            $query->whereRaw('LOWER(state_abbreviation) = ?', [strtolower($stateAbbreviation)]);
+        }
+        if ($postalCode) {
+            $query->whereRaw('LOWER(postal_code) = ?', [strtolower($postalCode)]);
+        }
+        if ($countyName) {
+            $query->whereRaw('LOWER(county_name) = ?', [strtolower($countyName)]);
+        }
+
+        return $query;
+    }
+
     public function clients(): HasMany
     {
         return $this->hasMany(Client::class);

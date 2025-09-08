@@ -1,11 +1,11 @@
-<div class="space-y-4">
+<div  >
     <x-page-heading title="New Client" />
-    <div class="flex w-full flex-row justify-center items-center">
-        <form wire:submit.prevent="store" class="w-full    space-y-6">
-            <div class="w-full  grid  grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-4">
+    <div class="form">
+       <form wire:submit.prevent="store" class="w-full space-y-4">
+
                 {{-- Personal Information Card --}}
-                <x-forms.card-form title="Personal Information">
-                    <div class="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4   ">
+
+                <x-common.form-header title="Personal Information" />
                         <flux:input wire:model="form.firstName" label="First Name" />
                         <flux:input wire:model="form.lastName" label="Last Name" />
                         <flux:date-picker wire:model="form.dob" label="Date of Birth" selectable-header with-today />
@@ -31,7 +31,6 @@
                                 </flux:select.option>
                             @endforeach
                         </flux:select>
-
                         <flux:select wire:model.live="form.healthcareProviderPlanId" variant="listbox" clearable
                             searchable label="Healthcare Provider Plan" filter>
                             @foreach ($this->form->healthcareProviderPlans as $healthcareProviderPlan)
@@ -41,10 +40,25 @@
                                 </flux:select.option>
                             @endforeach
                         </flux:select>
-                    </div>
-                </x-forms.card-form>
-                <x-forms.card-form title="Identification">
-                    <div class="w-full  grid  grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4">
+                       <flux:select wire:model.live="form.incomeTypeId" variant="listbox" clearable
+                            searchable label="Income Type" filter>
+                            @foreach ($this->form->incomeTypes as $incomeType)
+                                <flux:select.option value="{{ $incomeType->id }}"
+                                    wire:key="{{ $incomeType->id }}">
+                                    {{ $incomeType->name }}
+                                </flux:select.option>
+                            @endforeach
+                        </flux:select>
+
+                    <flux:fieldset>
+                            <div class="space-y-3">
+                                <flux:switch label="Is Deceased" align="left" wire:model="form.isDeceased" />
+                                <flux:switch label="Hispanic" align="left" wire:model="form.hispanic" />
+                            </div>
+                    </flux:fieldset>
+
+
+                    <x-common.form-header title="Identification" />
                         <div>
                             <flux:select wire:model="form.legalStatusId" variant="listbox" clearable searchable
                                 label="Legal Status" filter>
@@ -55,7 +69,6 @@
                                 @endforeach
                             </flux:select>
                         </div>
-
                         <div>
                             <flux:select wire:model="form.identificationTypeId" variant="listbox" clearable searchable
                                 label="Identification Type" filter>
@@ -67,7 +80,6 @@
                                 @endforeach
                             </flux:select>
                         </div>
-
                         <flux:input uppercase wire:model="form.identificationNumber" label="Identification Number" />
                         <flux:date-picker wire:model="form.identificationExpirationDate" label="ID Expiration Date"
                             selectable-header with-today />
@@ -98,14 +110,11 @@
                                 </flux:tab.panel>
                             </flux:tab.group>
                         </div>
-                    </div>
 
 
-                </x-forms.card-form>
 
 
-                <x-forms.card-form title="Income Information">
-                    <div class="grid grid-cols-1   gap-4">
+                         <x-common.form-header title="Income Information" />
                         <flux:checkbox.group variant="cards" class="flex-col">
                             <flux:checkbox wire:model.live='form.editAddPayment' value="newsletter"
                                 icon="currency-dollar" label="Add or Edit Payments"
@@ -135,10 +144,10 @@
                                 @endforeach
                             </div>
                         </div>
-                    </div>
-                </x-forms.card-form>
-                <x-forms.card-form title="Contact Demographics">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+
+
+                       <x-common.form-header title="Contact & Demographics" />
                         <div class="col-span-2">
                             <flux:input type="email" wire:model="form.email" label="Email" />
                         </div>
@@ -182,27 +191,34 @@
                                 </flux:select.option>
                             @endforeach
                         </flux:select>
-                    </div>
-                </x-forms.card-form>
+
+
 
 
                 {{-- Address Info --}}
-                <x-forms.card-form title="Address Information">
-                    <div class="grid grid-cols-4 gap-4 items-center">
-                        <div class="col-span-3 space-y-4">
-                            <x-common.summary-item label="Address" value="{{ $this->form->addressFormatted }}" />
+
+                  <x-common.form-header title="Address" />
+                         <div class="grid grid-cols-4">
+                          <div class="col-span-3 space-y-4 items-center justify-center">
+  <x-common.summary-item label="Address" value="{{ $this->form->addressFormatted }}" />
                             <x-common.summary-item label="Postal Code" value="{{ $this->form->addressPostalCode }}" />
                             <x-common.summary-item label="County" value="{{ $this->form->addressCountyName }}" />
                             <x-common.summary-item label="City" value="{{ $this->form->addressCityName }}" />
                             <x-common.summary-item label="State" value="{{ $this->form->addressStateAbbreviation }}" />
-                        </div>
-                        <div>
+</div>
+  <div>
                             <livewire:components.common.address-search-select @selected="handleSelectedAddress($event.detail.addressId)" />
                         </div>
-                    </div>
+
+</div>
+
+
+
+
+
                     <flux:error name="form.addressId" />
-                </x-forms.card-form>
-            </div>
+
+
             {{-- Action Buttons --}}
             <flux:button.group class="justify-end  ">
                 <flux:button wire:click="cancel" type="button" icon="x-mark">Cancel</flux:button>
@@ -212,5 +228,7 @@
             </flux:button.group>
         </form>
     </div>
+
+
 
 </div>

@@ -110,6 +110,8 @@ class Create extends Component
         $this->form->getEmergencyContacts();
         $this->form->getProgramBranches();
         $this->form->getClientServiceSpecialists();
+        $this->form->getIncomeTypes();
+        $this->form->incomeTypeId = $this->form->client?->income_type_id;
     }
 
     public function clearClient()

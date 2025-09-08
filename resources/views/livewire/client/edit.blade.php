@@ -1,16 +1,10 @@
-<div class="flex flex-col space-y-4">
+<div >
     <x-page-heading title="Edit Client: {{ $this->form->clientNumber }}" />
-    <div class="flex w-full flex-row justify-center items-center">
-        <form wire:submit.prevent="update" class="w-full    space-y-6">
-
-            <div class="w-full  grid  grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="form">
+        <form wire:submit.prevent="update"  >
                 {{-- Personal Information Card --}}
-                <div class="bg-white shadow rounded-2xl p-6">
-                    <div class="mb-4">
-                        <h2 class="text-lg font-semibold">Personal Information</h2>
-                        <flux:separator />
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4   ">
+
+                     <x-common.form-header title="Personal Information" />
                         <flux:input wire:model="form.firstName" label="First Name" />
                         <flux:input wire:model="form.lastName" label="Last Name" />
                         <flux:date-picker wire:model="form.dob" label="Date of Birth" type="date" selectable-header
@@ -47,16 +41,29 @@
                                 </flux:select.option>
                             @endforeach
                         </flux:select>
-                    </div>
-                </div>
+ <flux:select wire:model.live="form.incomeTypeId" variant="listbox" clearable
+                            searchable label="Income Type" filter>
+                            @foreach ($this->form->incomeTypes as $incomeType)
+                                <flux:select.option value="{{ $incomeType->id }}"
+                                    wire:key="{{ $incomeType->id }}">
+                                    {{ $incomeType->name }}
+                                </flux:select.option>
+                            @endforeach
+                        </flux:select>
+                        <flux:fieldset>
+                            <div class="space-y-3">
+                                <flux:switch label="Is Deceased" align="left" wire:model="form.isDeceased" />
+                                <flux:switch label="Hispanic" align="left" wire:model="form.hispanic" />
+                            </div>
+                    </flux:fieldset>
+
+
 
                 {{-- Identification Card --}}
-                <div class="bg-white shadow rounded-2xl p-6">
-                    <div class="mb-4">
-                        <h2 class="text-lg font-semibold">Identification</h2>
-                        <flux:separator />
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+
+                      <x-common.form-header title="Identification" />
+
                         <flux:select wire:model="form.legalStatusId" variant="listbox" clearable searchable
                             label="Legal Status" filter>
                             @foreach ($this->form->statuses as $status)
@@ -78,7 +85,7 @@
 
                         <flux:date-picker wire:model="form.identificationExpirationDate" type="date"
                             label="Identification Expiration Date" selectable-header with-today />
-                    </div>
+
                     <div class="mt-4">
                         <flux:tab.group>
                             <flux:tabs wire:model.live="tabPicture">
@@ -121,9 +128,13 @@
                             </flux:tab.panel>
                         </flux:tab.group>
                     </div>
-                </div>
-                <x-forms.card-form title="Income Information">
-                    <div class="grid grid-cols-1   gap-4">
+
+
+
+
+
+                    <x-common.form-header title="Income Information" />
+
                         <flux:checkbox.group variant="cards" class="flex-col">
                             <flux:checkbox wire:model.live='form.editAddPayment' value="newsletter"
                                 icon="currency-dollar" label="Add or Edit Payments"
@@ -153,16 +164,13 @@
                                 @endforeach
                             </div>
                         </div>
-                    </div>
-                </x-forms.card-form>
-                {{-- Contact & Demographics --}}
-                <div class="bg-white shadow rounded-2xl p-6">
-                    <div class="mb-4">
-                        <h2 class="text-lg font-semibold">Contact & Demographics</h2>
-                        <flux:separator />
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
+
+                {{-- Contact & Demographics --}}
+
+
+
+                       <x-common.form-header title="Contact & Demographics" />
                         <div class="col-span-2">
                             <flux:input type="email" wire:model="form.email" label="Email" />
                         </div>
@@ -206,14 +214,12 @@
                                 </flux:select.option>
                             @endforeach
                         </flux:select>
-                    </div>
-                </div>
+
+
                 {{-- Address Info --}}
-                <div class="bg-white shadow rounded-2xl p-6 col-span-1">
-                    <div class="mb-4">
-                        <h2 class="text-lg font-semibold">Address</h2>
-                        <flux:separator />
-                    </div>
+
+
+                       <x-common.form-header title="Address" />
 
                         <div class="grid grid-cols-4 gap-4 items-center">
                             <div class="col-span-3 space-y-4">
@@ -233,8 +239,8 @@
 
 
 
-                </div>
-            </div>
+
+
             {{-- Action Buttons --}}
             <flux:button.group class="justify-end  ">
                 <flux:button wire:click="cancel" type="button" icon="x-mark">Cancel</flux:button>

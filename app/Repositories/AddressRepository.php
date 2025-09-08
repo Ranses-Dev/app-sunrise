@@ -62,7 +62,7 @@ class AddressRepository implements AddressRepositoryInterface
     {
 
         return  Address::query()
-            ->search($data)
+            ->verify($data)
             ->when($id, function ($query) use ($id) {
                 return $query->where('id', '!=', $id);
             })->exists();

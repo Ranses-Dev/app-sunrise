@@ -10,8 +10,7 @@
                     <th>Total Income</th>
                     <th>Households</th>
                     <th>Income Category (%)</th>
-                    <th>Specialist</th>
-                    <th>Recertification Date</th>
+                    <th>Contracts</th>
                 </tr>
             </thead>
             <tbody>
@@ -28,13 +27,34 @@
                                 {{ "$contract->income_category %" }}
                             @endif
                         </td>
-                        <td>{{ $contract->specialist_name }}</td>
                         <td>
-                            @if ($contract->contract_meal_recertification_date && $contract->contract_meal_id)
-                                Contract Meal:
-                                {{ \Carbon\Carbon::parse($contract->contract_meal_recertification_date)->format('m/d/Y') }}
-                            @endif
+                            <div class="space-y-2">
+                                @if (!$contract->howpaContracts?->isEmpty())
+                                    <div class="border-1 border-gray-400 p-2 rounded-md">
+                                        <p class="border-b mb-2">Howpa Contracts:</p>
+                                        @foreach ($contract->howpaContracts as $howpaContract)
+
+                                            <p class="mr-1">
+                                                {{ \Carbon\Carbon::parse($howpaContract->re_certification_date)->format('m/d/Y') }}
+                                            </p>
+
+                                        @endforeach
+                                    </div>
+                                @endif
+                                @if (!$contract->contractMeals?->isEmpty())
+                                    <div class=" border-dashed border-2 p-2 rounded-md">
+                                        <p class="border-b mb-2">Contract Meals:</p>
+                                        @foreach ($contract->contractMeals as $contractMeal)
+                                            <p class="mr-1">
+                                                {{ \Carbon\Carbon::parse($contractMeal->recertification_date)->format('m/d/Y') }}
+                                            </p>
+
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
                         </td>
+
                     </tr>
                 @endforeach
             </tbody>

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Support\Collection as SupportCollection;
 
 interface UserRepositoryInterface
 {
@@ -18,4 +19,5 @@ interface UserRepositoryInterface
     public function getClientsActiveByUser(): array;
     public function getCertificationsOverdue(): QueryBuilder;
     public function getCertificationsDue(): QueryBuilder;
+    public function getInformationBySpecialists(): Builder;
 }

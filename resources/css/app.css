@@ -22,25 +22,58 @@
     --color-accent: var(--color-blue-500);
     --color-accent-content: var(--color-blue-600);
     --color-accent-foreground: var(--color-white);
+
+    /* Light mode cards */
+    --card-total-bg: var(--color-blue-100);
+    --card-total-fg: var(--color-blue-800);
+
+    --card-due-bg: var(--color-yellow-100);
+    --card-due-fg: var(--color-yellow-800);
+
+    --card-overdue-bg: var(--color-red-100);
+    --card-overdue-fg: var(--color-red-800);
+
+    --card-redue-bg: var(--color-orange-100);
+    --card-redue-fg: var(--color-orange-800);
+
+    --card-reoverdue-bg: var(--color-rose-100);
+    --card-reoverdue-fg: var(--color-rose-800);
 }
 @layer theme {
     .dark {
         --color-accent: var(--color-blue-500);
         --color-accent-content: var(--color-blue-400);
         --color-accent-foreground: var(--color-white);
+
+        /* Dark mode cards */
+        --card-total-bg: var(--color-blue-900);
+        --card-total-fg: var(--color-blue-100);
+
+        --card-due-bg: var(--color-yellow-900);
+        --card-due-fg: var(--color-yellow-100);
+
+        --card-overdue-bg: var(--color-red-900);
+        --card-overdue-fg: var(--color-red-100);
+
+        --card-redue-bg: var(--color-orange-900);
+        --card-redue-fg: var(--color-orange-100);
+
+        --card-reoverdue-bg: var(--color-rose-900);
+        --card-reoverdue-fg: var(--color-rose-100);
     }
 }
 
+@layer base {
+    form {
+        @apply w-full space-y-4;
+    }
+}
 @layer {
-    .form-grid {
-        @apply grid grid-cols-1 md:w-1/2 lg:w-1/3 gap-4 items-center justify-center mx-auto;
+    .form {
+        @apply w-full md:w-1/2 lg:w-1/3  items-center justify-center flex flex-col mx-auto;
     }
     .input-search {
         @apply w-full md:w-1/4 lg:w-1/6 mr-4;
-    }
-
-    .form {
-        @apply w-full  lg:w-1/2 space-y-4;
     }
 
     .form .buttons {

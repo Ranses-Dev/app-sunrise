@@ -29,6 +29,7 @@ class Index extends Component
         $this->form->getEthnicities();
         $this->form->getHealthcareProviders();
         $this->form->getGenders();
+        $this->form->getIncomeTypes();
     }
     public function render()
     {

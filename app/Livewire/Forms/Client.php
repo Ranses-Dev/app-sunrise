@@ -11,6 +11,7 @@ use Illuminate\Validation\Rules\RequiredIf;
 use Illuminate\Support\Carbon;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Str;
+use Livewire\Attributes\Computed;
 use App\Repositories\ClientRepositoryInterface as ClientRepository;
 use App\Repositories\LegalStatusRepositoryInterface as LegalStatusRepository;
 use App\Repositories\IdentificationTypeRepositoryInterface as IdentificationTypeRepository;
@@ -24,7 +25,7 @@ use App\Repositories\EthnicityRepositoryInterface as EthnicityRepository;
 use App\Repositories\HousingStatusRepositoryInterface as HousingStatusRepository;
 use App\Repositories\AddressRepositoryInterface as AddressRepository;
 use App\Traits\ImageHandler;
-use Livewire\Attributes\Computed;
+use App\Repositories\IncomeTypeRepositoryInterface as IncomeTypeRepository;
 
 class Client extends Form
 {
@@ -52,8 +53,11 @@ class Client extends Form
     public ?int $healthcareProviderId = null;
     public ?int $healthcareProviderPlanId = null;
     public ?int $housingStatusId = null;
+    public ?int $incomeTypeId = null;
     public ?string $clientNumber = null;
     public ?bool $existsFileIdentificationCard = null;
+    public bool $isDeceased = false;
+    public bool $hispanic = false;
     protected ClientRepository $clientRepository;
     protected LegalStatusRepository $legalStatusRepository;
     protected IdentificationTypeRepository $identificationTypeRepository;
@@ -66,6 +70,7 @@ class Client extends Form
     protected EthnicityRepository $ethnicityRepository;
     protected HousingStatusRepository $housingStatusRepository;
     protected AddressRepository $addressRepository;
+    protected IncomeTypeRepository $incomeTypeRepository;
     public $statuses = null;
     public $identificationTypes = null;
     public $cityDistricts = null;
@@ -76,6 +81,8 @@ class Client extends Form
     public $genders = null;
     public $ethnicities = null;
     public $housingStatuses = null;
+    public $incomeTypes = null;
+
 
     //For Address
     public ?int $addressId = null;
@@ -94,13 +101,16 @@ class Client extends Form
     //Filters
     public array $filters = [
         'search' => '',
-        'legalStatusId' => '',
-        'identificationTypeId' => '',
-        'ethnicityId' => '',
-        'healthcareProviderId' => '',
-        'genderId' => '',
-        'hasHowpa' => false,
-        'hasMeals' => false,
+        'legal_status_id' => '',
+        'identification_type_id' => '',
+        'ethnicity_id' => '',
+        'healthcare_provider_id' => '',
+        'gender_id' => '',
+        'income_type_id' => '',
+        'has_howpa' => false,
+        'has_meals' => false,
+        'from_age' => null,
+        'to_age' => null,
     ];
 
     public function boot()
@@ -117,6 +127,7 @@ class Client extends Form
         $this->ethnicityRepository = app(EthnicityRepository::class);
         $this->housingStatusRepository = app(HousingStatusRepository::class);
         $this->addressRepository = app(AddressRepository::class);
+        $this->incomeTypeRepository = app(IncomeTypeRepository::class);
     }
 
     public function rules(): array
@@ -141,7 +152,15 @@ class Client extends Form
             'frequencyPayment' => ['nullable', 'string', Rule::requiredIf($this->editAddPayment), Rule::in(PaymentFrequency::values())],
             'legalStatusId' => ['required', 'exists:legal_statuses,id'],
             'identificationTypeId' => ['required', 'exists:identification_types,id'],
-            'identificationNumber' => ['required', 'string', 'max:255', Rule::unique('clients', 'identification_number')->ignore($this->id)],
+            'identificationNumber' => ['required', 'string', 'max:255', function ($attribute, $value, $fail) {
+                if (filled($this->identificationTypeId) && filled($value)) {
+                    if ($this->clientRepository->clientExistsByIdentification($this->identificationTypeId, $value, $this->id)) {
+                        $fail('The identification number has already been taken for the selected identification type.');
+                    }
+                } else {
+                    $fail('The identification type and identification number are required.');
+                }
+            }],
             'identificationExpirationDate' => [
                 'required',
                 'nullable',
@@ -178,6 +197,9 @@ class Client extends Form
             ],
             'housingStatusId' => ['nullable', 'exists:housing_statuses,id'],
             'addressId' => ['required', 'exists:addresses,id'],
+            'hispanic' => ['required', 'boolean'],
+            'isDeceased' => ['required', 'boolean'],
+            'incomeTypeId' => ['nullable', 'exists:income_types,id']
 
         ];
     }
@@ -204,6 +226,7 @@ class Client extends Form
             'housingStatusId.exists' => 'The selected housing status is invalid.',
             'addressId.exists' => 'The selected address is invalid.',
             'addressId.required' => 'The address is required.',
+            'incomeTypeId.exists' => 'The selected income type is invalid.',
         ];
     }
 
@@ -227,6 +250,8 @@ class Client extends Form
                 $this->email = $result->email;
                 $this->genderId = $result->gender_id;
                 $this->ethnicityId = $result->ethnicity_id;
+                $this->hispanic = $result->hispanic;
+                $this->isDeceased = $result->is_deceased;
                 $this->healthcareProviderId = $result->healthcare_provider_id;
                 $this->getHealthcareProviderPlans();
                 $this->healthcareProviderPlanId = $result->healthcare_provider_plan_id;
@@ -242,6 +267,8 @@ class Client extends Form
                 $this->effectiveDate = $result->effective_date ? Carbon::parse($result->effective_date)->format('Y-m-d') : null;
                 $this->addressId = $result->address_id;
                 $this->getAddressById();
+                $this->getIncomeTypes();
+                $this->incomeTypeId = $result->income_type_id;
             }
         }
     }
@@ -273,6 +300,9 @@ class Client extends Form
             'legal_status_id' => $this->legalStatusId,
             'payment_amounts' => $this->paymentAmounts,
             'ssn' => $this->ssn,
+            'is_deceased' => $this->isDeceased,
+            'hispanic' => $this->hispanic,
+            'income_type_id' => $this->incomeTypeId
 
         ];
 
@@ -329,6 +359,8 @@ class Client extends Form
             'paymentAmounts',
             'ssn',
             'zipCode',
+            'isDeceased',
+            'hispanic'
         ]);
     }
     public function delete()
@@ -406,6 +438,10 @@ class Client extends Form
             $this->addressCityName = $address->city;
             $this->addressStateAbbreviation = $address->state_abbreviation;
         }
+    }
+    public function getIncomeTypes()
+    {
+        $this->incomeTypes = $this->incomeTypeRepository->getAll();
     }
 
     #[Computed]

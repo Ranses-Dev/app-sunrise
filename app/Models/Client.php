@@ -10,10 +10,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Facades\DB;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -51,6 +50,8 @@ class Client extends Model
         'monthly_client_payment_portion',
         'payment_amounts',
         'ssn',
+        'hispanic',
+        'income_type_id'
 
     ];
     protected $casts = [
@@ -67,6 +68,7 @@ class Client extends Model
 
 
     ];
+    protected $appends = ["age"];
 
     public function getActivitylogOptions(): LogOptions
     {
@@ -115,10 +117,13 @@ class Client extends Model
     {
         return $this->belongsTo(HealthcareProviderPlan::class);
     }
-
+    public function incomeType(): BelongsTo
+    {
+        return $this->belongsTo(IncomeType::class);
+    }
     public function scopeSearch(Builder $query, array $filters): Builder
     {
-        $query->with(['legalStatus', 'identificationType', 'cityDistrict', 'countyDistrict', 'city', 'healthcareProvider', 'healthcareProviderPlan', 'howpaContracts', 'contractMeals']);
+        $query->with(['legalStatus', 'identificationType', 'incomeType', 'cityDistrict', 'countyDistrict', 'city', 'healthcareProvider', 'healthcareProviderPlan', 'howpaContracts', 'contractMeals']);
         $query->when(filled($filters['search'] ?? null), function (Builder $q) use ($filters) {
             $search = $filters['search'];
             $q->where(function (Builder $qq) use ($search) {
@@ -136,34 +141,48 @@ class Client extends Model
                 }
             });
         });
-        $query->when(filled($filters['legalStatusId'] ?? null), function (Builder $q) use ($filters) {
-            $q->where('legal_status_id', (int) $filters['legalStatusId']);
+        $query->when(filled($filters['legal_status_id'] ?? null), function (Builder $q) use ($filters) {
+            $q->where('legal_status_id', (int) $filters['legal_status_id']);
         });
-        $query->when(filled($filters['identificationTypeId'] ?? null), function (Builder $q) use ($filters) {
-            $q->where('identification_type_id', (int) $filters['identificationTypeId']);
+        $query->when(filled($filters['identification_type_id'] ?? null), function (Builder $q) use ($filters) {
+            $q->where('identification_type_id', (int) $filters['identification_type_id']);
         });
-        $query->when(filled($filters['ethnicityId'] ?? null), function (Builder $q) use ($filters) {
-            $q->where('ethnicity_id', (int) $filters['ethnicityId']);
+        $query->when(filled($filters['ethnicity_id'] ?? null), function (Builder $q) use ($filters) {
+            $q->where('ethnicity_id', (int) $filters['ethnicity_id']);
         });
-        $query->when(filled($filters['healthcareProviderId'] ?? null), function (Builder $q) use ($filters) {
-            $q->where('healthcare_provider_id', (int) $filters['healthcareProviderId']);
+        $query->when(filled($filters['healthcare_provider_id'] ?? null), function (Builder $q) use ($filters) {
+            $q->where('healthcare_provider_id', (int) $filters['healthcare_provider_id']);
         });
-        $query->when(filled($filters['genderId'] ?? null), function (Builder $q) use ($filters) {
-            $q->where('gender_id', (int) $filters['genderId']);
+        $query->when(filled($filters['gender_id'] ?? null), function (Builder $q) use ($filters) {
+            $q->where('gender_id', (int) $filters['gender_id']);
         });
         $hasHowpa = filter_var(
-            $filters['hasHowpa'] ?? null,
+            $filters['has_howpa'] ?? null,
             FILTER_VALIDATE_BOOLEAN,
             FILTER_NULL_ON_FAILURE
         );
 
         $hasMeals = filter_var(
-            $filters['hasMeals'] ?? null,
+            $filters['has_meals'] ?? null,
             FILTER_VALIDATE_BOOLEAN,
             FILTER_NULL_ON_FAILURE
         );
         $query->when($hasHowpa, fn(Builder $q) => $q->whereHas('howpaContracts'));
         $query->when($hasMeals, fn(Builder $q) => $q->whereHas('contractMeals'));
+        $fromAge = filter_var($filters['from_age'] ?? null, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
+        $toAge   = filter_var($filters['to_age']   ?? null, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
+
+        if ($fromAge !== null) {
+            $cutoff = Carbon::today()->subYears((int) $fromAge)->toDateString();
+            $query->whereDate('dob', '<=', $cutoff)->whereNotNull('dob');
+        }
+        if ($toAge !== null) {
+            $lower = Carbon::today()->subYears((int) $toAge + 1)->addDay()->toDateString();
+            $query->whereDate('dob', '>=', $lower)->whereNotNull('dob');
+        }
+        $query->when(filled($filters['income_type_id'] ?? null), function (Builder $q) use ($filters) {
+            $q->where('income_type_id', (int) $filters['income_type_id']);
+        });
         return $query;
     }
     public function scopeSsn(Builder $query, string|null $ssn): Builder
@@ -315,53 +334,72 @@ class Client extends Model
 
     public static function recertificationsDue(?array $filters): Builder
     {
-        $today = Carbon::today();
-        $lastDay = $today->copy()->addMonths(3);
-        return static::query()
-            ->join('contract_meals', 'clients.id', '=', 'contract_meals.client_id')
-            ->join('users', 'contract_meals.client_service_specialist_id', '=', 'users.id')
-            ->where('contract_meals.is_active', true)
-            ->whereBetween('contract_meals.recertification_date', [$today, $lastDay])
-            ->when(!empty($filters['date_range'] ?? null), function (Builder $query) use ($filters) {
-                $dateRange = explode(' - ', $filters['date_range']);
-                if (count($dateRange) === 2) {
-                    $startDate = Carbon::parse(trim($dateRange[0]))->startOfDay();
-                    $endDate = Carbon::parse(trim($dateRange[1]))->endOfDay();
-                    $query->where('contract_meals.recertification_date', '>=', $startDate)
-                        ->where('contract_meals.recertification_date', '<=', $endDate);
-                }
-            })
-            ->when(!empty($filters['user_id'] ?? null), function (Builder $query) use ($filters) {
-                $query->where('contract_meals.client_service_specialist_id', $filters['user_id']);
-            })
-            ->when(!empty($filters['city_district_id'] ?? null), function (Builder $query) use ($filters) {
-                $query->where('clients.city_district_id', $filters['city_district_id']);
-            })
-            ->when(!empty($filters['county_district_id'] ?? null), function (Builder $query) use ($filters) {
-                $query->where('clients.county_district_id', $filters['county_district_id']);
-            })
-            ->when(!empty($filters['city_id'] ?? null), function (Builder $query) use ($filters) {
-                $query->where('clients.city_id', $filters['city_id']);
-            })
 
-            ->select(
-                'clients.*',
-                'users.*',
-                DB::raw("CASE WHEN contract_meals.recertification_date BETWEEN '$today' AND '$lastDay' THEN contract_meals.recertification_date ELSE NULL END AS contract_meal_recertification_date"),
-                DB::raw("CASE WHEN contract_meals.recertification_date BETWEEN '$today' AND '$lastDay' THEN contract_meals.id ELSE NULL END AS contract_meal_id"),
-                DB::raw('users.name as specialist_name')
-            )
-            ->orderBy('contract_meals.recertification_date');
+        $today = filled($filters['date_range'] ?? null) ? explode(' - ', $filters['date_range'])[0] : Carbon::today();
+        $lastDay = filled($filters['date_range'] ?? null) ? explode(' - ', $filters['date_range'])[1] : $today->copy()->addMonths(3);
+        $query = static::query();
+        if (filled($filters['city_district_id'] ?? null)) {
+            $query->where('city_district_id', (int) $filters['city_district_id']);
+        }
+        if (filled($filters['county_district_id'] ?? null)) {
+            $query->where('county_district_id', (int) $filters['county_district_id']);
+        }
+        if (filled($filters['city_id'] ?? null)) {
+            $query->where('city_id', (int) $filters['city_id']);
+        }
+
+        $query->with([
+            'contractMeals' => function ($query) use ($today, $lastDay, $filters) {
+                $query->whereBetween('recertification_date', [$today, $lastDay]);
+                $query->when(filled($filters['user_id'] ?? null), function ($q) use ($filters) {
+                    $q->where('client_service_specialist_id', (int) $filters['user_id']);
+                });
+            },
+            'howpaContracts' => function ($query) use ($today, $lastDay, $filters) {
+                $query->whereBetween('re_certification_date', [$today, $lastDay]);
+                $query->when(filled($filters['user_id'] ?? null), function ($q) use ($filters) {
+                    $q->where('client_service_specialist_id', (int) $filters['user_id']);
+                });
+            },
+        ]);
+        $query->where(function ($q) use ($today, $lastDay) {
+            $q->whereHas('contractMeals', function ($query) use ($today, $lastDay) {
+                $query->whereBetween('recertification_date', [$today, $lastDay]);
+            })
+                ->orWhereHas('howpaContracts', function ($query) use ($today, $lastDay) {
+                    $query->whereBetween('re_certification_date', [$today, $lastDay]);
+                });
+        });
+        return $query;
     }
     public static function identificationsOverdue(?array $filters): Builder
     {
         $today = now();
-        return static::with(['identificationType', 'legalStatus'])
-            ->where('identification_expiration_date', '<', $today)
-            ->whereHas('legalStatus', function (Builder $query) {
-                $query->where('name', '!=', 'Citizen');
-            })
-        ;
+        $query = static::with(['identificationType', 'legalStatus']);
+        if (filled($filters['city_district_id'] ?? null)) {
+            $query->where('city_district_id', (int) $filters['city_district_id']);
+        }
+        if (filled($filters['county_district_id'] ?? null)) {
+            $query->where('county_district_id', (int) $filters['county_district_id']);
+        }
+        if (filled($filters['city_id'] ?? null)) {
+            $query->where('city_id', (int) $filters['city_id']);
+        }
+        if (filled($filters['date_range'] ?? null)) {
+            $dateRange = explode(' - ', $filters['date_range']);
+            if (count($dateRange) === 2) {
+                $startDate = Carbon::parse(trim($dateRange[0]));
+                $endDate = Carbon::parse(trim($dateRange[1]));
+                $query->whereBetween('identification_expiration_date', [$startDate, $endDate]);
+            }
+        } else {
+            $query->where('identification_expiration_date', '<', $today);
+        }
+        $query->whereHas('legalStatus', function (Builder $query) {
+            $query->whereRaw('LOWER(name) != ?', ['citizen']);
+        });
+
+        return $query;
     }
     public static function identificationsOverdueCount(): int
     {
@@ -409,40 +447,60 @@ class Client extends Model
     public static function  recertificationsOverdue(?array $filters): Builder
     {
         $today = Carbon::today();
-        return static::query()
-            ->join('contract_meals', 'contract_meals.client_id', '=', 'clients.id')
-            ->join('users', 'contract_meals.client_service_specialist_id', '=', 'users.id')
-            ->where('contract_meals.is_active', true)
-            ->whereDate('contract_meals.recertification_date', '<', $today)
-            ->when(!empty($filters['date_range'] ?? null), function (Builder $query) use ($filters) {
-                $dateRange = explode(' - ', $filters['date_range']);
-                if (count($dateRange) === 2) {
-                    $startDate = Carbon::parse(trim($dateRange[0]))->startOfDay();
-                    $endDate = Carbon::parse(trim($dateRange[1]))->endOfDay();
-                    $query->where('contract_meals.recertification_date', '>=', $startDate)
-                        ->where('contract_meals.recertification_date', '<=', $endDate);
-                }
-            })
-            ->when(!empty($filters['user_id'] ?? null), function (Builder $query) use ($filters) {
-                $query->where('contract_meals.client_service_specialist_id', $filters['user_id']);
-            })
-            ->when(!empty($filters['city_district_id'] ?? null), function (Builder $query) use ($filters) {
-                $query->where('clients.city_district_id', $filters['city_district_id']);
-            })
-            ->when(!empty($filters['county_district_id'] ?? null), function (Builder $query) use ($filters) {
-                $query->where('clients.county_district_id', $filters['county_district_id']);
-            })
-            ->when(!empty($filters['city_id'] ?? null), function (Builder $query) use ($filters) {
-                $query->where('clients.city_id', $filters['city_id']);
-            })
-            ->orderBy('contract_meals.recertification_date')
-            ->select(
-                'clients.*',
-                'users.*',
-                DB::raw('users.name as specialist_name'),
-                DB::raw("CASE WHEN contract_meals.recertification_date < '$today' THEN contract_meals.recertification_date ELSE NULL END AS contract_meal_recertification_date"),
-                DB::raw("CASE WHEN contract_meals.recertification_date < '$today' THEN contract_meals.id ELSE NULL END AS contract_meal_id")
-            );
+        $rangeStart = null;
+        $rangeEnd   = null;
+        if (filled($filters['date_range'] ?? null)) {
+            $parts = explode(' - ', $filters['date_range']);
+            if (count($parts) === 2) {
+                $rangeStart = Carbon::parse(trim($parts[0]))->startOfDay();
+                $rangeEnd   = Carbon::parse(trim($parts[1]))->endOfDay();
+            }
+        }
+        $query = static::query();
+        if (filled($filters['city_district_id'] ?? null)) {
+            $query->where('city_district_id', (int) $filters['city_district_id']);
+        }
+        if (filled($filters['county_district_id'] ?? null)) {
+            $query->where('county_district_id', (int) $filters['county_district_id']);
+        }
+        if (filled($filters['city_id'] ?? null)) {
+            $query->where('city_id', (int) $filters['city_id']);
+        }
+        $applyMeals = function ($q) use ($today, $rangeStart, $rangeEnd, $filters) {
+            if ($rangeStart && $rangeEnd) {
+                $q->whereBetween('recertification_date', [$rangeStart, $rangeEnd]);
+            } else {
+                // Overdue: fecha <= hoy
+                $q->where('recertification_date', '<=', $today);
+            }
+
+            if (filled($filters['user_id'] ?? null)) {
+                $q->where('client_service_specialist_id', (int) $filters['user_id']);
+            }
+        };
+        $applyHowpa = function ($q) use ($today, $rangeStart, $rangeEnd, $filters) {
+            if ($rangeStart && $rangeEnd) {
+                $q->whereBetween('re_certification_date', [$rangeStart, $rangeEnd]);
+            } else {
+                // Overdue: fecha <= hoy
+                $q->where('re_certification_date', '<=', $today);
+            }
+
+            if (filled($filters['user_id'] ?? null)) {
+                $q->where('client_service_specialist_id', (int) $filters['user_id']);
+            }
+        };
+        $query->with([
+            'contractMeals'   => $applyMeals,
+            'howpaContracts'  => $applyHowpa,
+        ]);
+        $query->where(function ($q) use ($applyMeals, $applyHowpa) {
+            $q->whereHas('contractMeals', $applyMeals)
+                ->orWhereHas('howpaContracts', $applyHowpa);
+        });
+
+
+        return $query;
     }
     public static function recertificationsDueCount(): int
     {

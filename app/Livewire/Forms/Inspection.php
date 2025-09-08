@@ -142,9 +142,17 @@ class Inspection extends Form
             'landlordHowpaId' => ['nullable', 'exists:howpa,id', 'prohibited_unless:programBranchId,7'],
 
             'tenantName' => ['nullable', 'string'],
-            'tenantHowpaId' => ['nullable', 'exists:howpa,id', 'prohibited_unless:programBranchId,7', 'same:addressId'],
+            'tenantHowpaId' => ['nullable', 'exists:howpa,id', 'prohibited_unless:programBranchId,7', function ($attribute, $value, $fail) {
+                if ($value && $value !== $this->addressId) {
+                    $fail("The tenant Howpa ID field must be the same as the inspection address selected.");
+                }
+            }],
             'tenantContactInformation' => ['nullable', 'string'],
-            'tenantAddressId' => ['nullable', self::EXISTS_ADDRESS],
+            'tenantAddressId' => ['nullable', self::EXISTS_ADDRESS, function ($attribute, $value, $fail) {
+                if ($value && $value !== $this->addressId) {
+                    $fail("The tenant Address ID field must be the same as the inspection address selected.");
+                }
+            }],
 
             'housingTypeId' => ['nullable', 'exists:housing_types,id'],
             'numberOfBedrooms' => ['required', 'integer', 'min:1'],

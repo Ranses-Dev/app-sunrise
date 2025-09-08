@@ -26,11 +26,11 @@
                         <td>{{ $client->legalStatus?->name }}</td>
                         <td>{{ $client->identification_data }}</td>
                         <td>
-                            <flux:badge variant="solid" size="sm" color="red">
+                            <strong>
                                 {{ $client->identification_expiration_date?->format('m/d/Y') }}
-                            </flux:badge>
+                            </strong>
                         </td>
-                        <td>{{ $client->full_address }}</td>
+                        <td>{{ $client->address?->address_formatted }}</td>
                     </tr>
                 @endforeach
             </tbody>

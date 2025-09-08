@@ -1,9 +1,9 @@
-<div class="space-y-4">
+<div >
     <x-page-heading title="Edit Inspection" />
+ <div class="form">
     <form wire:submit.prevent="save" class="space-y-4">
- <div class="form-grid">
-        <flux:card>
-            <flux:label>Inspection Address</flux:label>
+
+           <x-common.form-header title="Inspection Address" />
             <div class="grid grid-cols-4   justify-center items-center">
                 <div class="col-span-3 space-y-4">
                     <x-common.summary-item label="Address" value="{{ $this->form->inspectionAddressFormatted }}" />
@@ -11,7 +11,7 @@
                 <livewire:components.common.address-search-select  @selected="selectedInspectionAddress($event.detail.addressId)" wire:key='inspection-address-search-select' />
             </div>
             <flux:error name="form.addressId" />
-        </flux:card>
+
         <flux:select variant="listbox" clearable label="Program Branch" wire:model.live="form.programBranchId">
             @if($this->form->programBranches)
                 @foreach($this->form->programBranches as $branch)
@@ -65,8 +65,8 @@
         </div>
        <flux:input label="Landlord Name" wire:model='form.landlordName' />
       <flux:input label="Landlord Contact Information" wire:model='form.landlordContactInformation'/>
-      <flux:card>
-            <flux:label>Landlord Address</flux:label>
+
+            <x-common.form-header title="Landlord Address" />
             <div class="grid grid-cols-4   justify-center items-center">
                 <div class="col-span-3 space-y-4">
                     <x-common.summary-item label="Address" value="{{ $this->form->landlordAddressFormatted }}" />
@@ -74,11 +74,11 @@
                 <livewire:components.common.address-search-select  @selected="selectedLandlordAddress($event.detail.addressId)" wire:key='inspection-landlord-search-select' />
             </div>
             <flux:error name="form.landlordAddressId" />
-        </flux:card>
+
         <flux:input label="Tenant Name" wire:model='form.tenantName' />
       <flux:input label="Tenant Contact Information" wire:model='form.tenantContactInformation'/>
-      <flux:card>
-            <flux:label>Tenant Address</flux:label>
+
+            <x-common.form-header title="Tenant Address" />
             <div class="grid grid-cols-4   justify-center items-center">
                 <div class="col-span-3 space-y-4">
                     <x-common.summary-item label="Address" value="{{ $this->form->tenantAddressFormatted }}" />
@@ -86,7 +86,7 @@
                 <livewire:components.common.address-search-select  @selected="selectedTenantAddress($event.detail.addressId)" wire:key='inspection-tenant-search-select' />
             </div>
             <flux:error name="form.tenantAddressId" />
-        </flux:card>
+
         <flux:select variant="listbox" searchable clearable label="Housing Type" wire:model="form.housingTypeId">
             @if($this->form->housingTypes)
                 @foreach($this->form->housingTypes as $type)
@@ -111,13 +111,15 @@
             @endif
         </flux:select>
        <div class="flex justify-end">
-<flux:button.group class="justify-end  ">
+        <flux:button.group class="justify-end  ">
                 <flux:button wire:click="cancel" type="button" icon="x-mark">Cancel</flux:button>
                 <flux:button type="submit" icon="plus" variant="primary">Save</flux:button>
 
-            </flux:button.group>
+        </flux:button.group>
 </div>
-    </div>
+
 </form>
+</div>
+
 
 </div>

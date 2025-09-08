@@ -6,7 +6,6 @@ use App\Enums\CrudMessages;
 use Livewire\Component;
 use Livewire\WithoutUrlPagination;
 use Livewire\WithPagination;
-
 use App\Livewire\Forms\HowpaContract as FormsHowpaContract;
 use Flux\Flux;
 use Illuminate\Support\Facades\Log;
@@ -46,10 +45,12 @@ class Index extends Component
         $this->form->id = $id;
         $this->dispatch('open-modal-delete');
     }
+    #[On('cancel-delete')]
     public function cancelDelete()
     {
         $this->form->reset('id');
     }
+    #[On('confirm-delete')]
     public function confirmDelete()
     {
         if ($this->form->id) {
@@ -67,7 +68,8 @@ class Index extends Component
 
     public function export()
     {
-       
         $this->redirect(route('exports.howpa-contracts', ["filters" => $this->form->filters]));
     }
+
+    
 }

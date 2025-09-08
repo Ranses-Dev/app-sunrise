@@ -79,4 +79,11 @@ class HealthcareProviderRepository implements HealthcareProviderRepositoryInterf
         }
         return false;
     }
+
+    public function getClientsByHealthcareProvider(): array
+    {
+        return HealthcareProvider::withCount(['clients as count_clients'])->get()->map(function ($client) {
+            return ["name" => $client->name, "count_clients" => $client->count_clients];
+        })->toArray();
+    }
 }

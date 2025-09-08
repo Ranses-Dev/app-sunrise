@@ -1,13 +1,10 @@
 <div>
 
 
-
-    <flux:card>
-        <flux:heading size="lg">Household Composition</flux:heading>
+         <x-common.form-header title="Household Members"   />
         <flux:table :paginate="$this->records">
             <flux:table.columns>
                 <flux:table.column>Full Name</flux:table.column>
-                <flux:table.column>Gender</flux:table.column>
                 <flux:table.column>Relationship with the applicant</flux:table.column>
                 <flux:table.column>Social Security</flux:table.column>
                 <flux:table.column>Date of Birth</flux:table.column>
@@ -20,7 +17,6 @@
                 @foreach ($this->records as $household)
                     <flux:table.row :key="$household->id">
                         <flux:table.cell>{{ $household->full_name }}</flux:table.cell>
-                        <flux:table.cell>{{$household->gender_code}}</flux:table.cell>
                         <flux:table.cell>{{ $household->householdRelationTypeName }}</flux:table.cell>
                         <flux:table.cell>
                             @if ($household->ssn)
@@ -47,7 +43,7 @@
         </flux:table>
 
 
-    </flux:card>
+
 
 
 

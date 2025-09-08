@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 
 use App\Models\Ethnicity;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
 
@@ -20,4 +21,5 @@ interface EthnicityRepositoryInterface
 
     public function delete(int $id): bool;
 
+    public function getEthnicitiesWithClientCount(): Builder;
 }

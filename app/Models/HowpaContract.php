@@ -38,11 +38,14 @@ class HowpaContract extends Model
         'recent_living_situation_notes',
         'recent_living_situation',
         'savings_balance',
+        'enrollment_day',
+        'is_active',
     ];
 
     protected $casts = [
         'date' => 'date',
         're_certification_date' => 'date',
+        'enrollment_day' => 'date',
         'has_aids' => 'boolean',
         'howpa_prior_to_2023' => 'boolean',
         'currently_receiving_other_aid' => 'boolean',
@@ -52,6 +55,7 @@ class HowpaContract extends Model
         'owns_real_estate' => 'boolean',
         'has_checking_account' => 'boolean',
         'has_savings' => 'boolean',
+
     ];
 
     public function client(): BelongsTo
@@ -101,11 +105,19 @@ class HowpaContract extends Model
             $end   = $filters['rangeDate']['end'] ?? null;
             $query->whereBetween('date', [$start, $end]);
         }
+        if (!empty($filters['rangeEnrollmentDay'])) {
+            $start = $filters['rangeEnrollmentDay']['start'] ?? null;
+            $end   = $filters['rangeEnrollmentDay']['end'] ?? null;
+            $query->whereBetween('enrollment_day', [$start, $end]);
+        }
         if (!empty($filters['rangeReCertificationDate'])) {
             $start = $filters['rangeReCertificationDate']['start'] ?? null;
             $end   = $filters['rangeReCertificationDate']['end'] ?? null;
             $query->whereBetween('re_certification_date', [$start, $end]);
         }
+        $query->when(isset($filters['isActive']), function ($q) use ($filters) {
+            $q->where('is_active', $filters['isActive']);
+        });
 
         return $query;
     }
@@ -113,10 +125,5 @@ class HowpaContract extends Model
     public function clientServiceSpecialist(): BelongsTo
     {
         return $this->belongsTo(User::class, 'client_service_specialist_id');
-    }
-
-    public function getIsActiveAttribute(): bool
-    {
-        return  Carbon::now()->isAfter($this->date) && Carbon::now()->isBefore($this->re_certification_date);
     }
 }

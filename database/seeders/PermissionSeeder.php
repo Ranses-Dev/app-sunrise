@@ -44,6 +44,7 @@ class PermissionSeeder extends Seeder
             'Housing Type',
             'Inspection',
             'Address',
+            'Income Type',
         ];
         $actions = ['view any', 'view', 'create', 'update', 'delete', 'restore', 'force delete'];
         foreach ($models as $model) {

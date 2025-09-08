@@ -20,4 +20,6 @@ interface CityRepositoryInterface
 
     public function delete(int $id): bool;
     public function getCityByDistrictId(int|string|null $districtId): Collection;
+
+   
 }

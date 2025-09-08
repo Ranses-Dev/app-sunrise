@@ -39,7 +39,7 @@ class EmergencyContact extends Form
             'householdRelationTypeId' => ['required', 'exists:household_relation_types,id'],
             'name' => ['required', 'string', 'max:255'],
             'address' => ['required', 'string', 'max:255'],
-            'phoneNumber' => ['required', 'string', 'max:20', Rule::unique('emergency_contacts')->ignore($this->id)->where(function ($query) {
+            'phoneNumber' => ['required', 'string', 'max:20', Rule::unique('emergency_contacts','phone_number')->ignore($this->id)->where(function ($query) {
                 return $query->where('client_id', $this->clientId);
             })],
         ];

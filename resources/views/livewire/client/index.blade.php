@@ -13,7 +13,7 @@
     </div>
     <x-common.card-filter>
         <flux:input wire:model.live.debounce1000ms="form.filters.search" label="Search"></flux:input>
-        <flux:select wire:model.live="form.filters.legalStatusId" variant="listbox" label="Legal Status" clearable
+        <flux:select wire:model.live="form.filters.legal_status_id" variant="listbox" label="Legal Status" clearable
             searchable placeholder="Choose legal status...">
             @if ($this->form->statuses)
                 @foreach ($this->form->statuses as $status)
@@ -21,7 +21,7 @@
                 @endforeach
             @endif
         </flux:select>
-        <flux:select wire:model.live="form.filters.identificationTypeId" variant="listbox" label="Identification Type"
+        <flux:select wire:model.live="form.filters.identification_type_id" variant="listbox" label="Identification Type"
             clearable searchable placeholder="Choose identification type...">
             @if ($this->form->identificationTypes)
                 @foreach ($this->form->identificationTypes as $type)
@@ -29,24 +29,31 @@
                 @endforeach
             @endif
         </flux:select>
-        <flux:select wire:model.live="form.filters.ethnicityId" variant="listbox" label="Ethnicity" clearable searchable
-            placeholder="Choose ethnicity...">
+        <flux:select wire:model.live="form.filters.ethnicity_id" variant="listbox" label="Ethnicity" clearable
+            searchable placeholder="Choose ethnicity...">
             @if ($this->form->ethnicities)
                 @foreach ($this->form->ethnicities as $ethnicity)
                     <flux:select.option value="{{ $ethnicity->id }}">{{ $ethnicity->name }}</flux:select.option>
                 @endforeach
             @endif
         </flux:select>
-        <flux:select wire:model.live="form.filters.healthcareProviderId" variant="listbox" label="Healthcare Provider"
+        <flux:select wire:model.live="form.filters.healthcare_provider_id" variant="listbox" label="Healthcare Provider"
             clearable searchable placeholder="Choose healthcare provider...">
             @if ($this->form->healthcareProviders)
                 @foreach ($this->form->healthcareProviders as $provider)
                     <flux:select.option value="{{ $provider->id }}">{{ $provider->name }}</flux:select.option>
                 @endforeach
             @endif
-
         </flux:select>
-        <flux:select wire:model.live="form.filters.genderId" variant="listbox" label="Gender" clearable searchable
+        <flux:select wire:model.live="form.filters.income_type_id" variant="listbox" label="Income Type" clearable
+            searchable placeholder="Choose income type...">
+            @if ($this->form->incomeTypes)
+                @foreach ($this->form->incomeTypes as $incomeType)
+                    <flux:select.option value="{{ $incomeType->id }}">{{ $incomeType->name }}</flux:select.option>
+                @endforeach
+            @endif
+        </flux:select>
+        <flux:select wire:model.live="form.filters.gender_id" variant="listbox" label="Gender" clearable searchable
             placeholder="Choose gender...">
             @if ($this->form->genders)
                 @foreach ($this->form->genders as $gender)
@@ -54,6 +61,29 @@
                 @endforeach
             @endif
         </flux:select>
+        <flux:input.group class="flex flex-col">
+            <div>
+                <flux:label>Age Range</flux:label>
+            </div>
+            <div class="flex flex-row mt-2 gap-1">
+                <flux:field>
+                    <flux:input.group>
+                        <flux:input.group.prefix>From</flux:input.group.prefix>
+                        <flux:input type="number" wire:model.live.debounce1000ms="form.filters.from_age"
+                            placeholder="18" />
+                    </flux:input.group>
+                </flux:field>
+                <flux:field>
+                    <flux:input.group>
+                        <flux:input.group.prefix>To</flux:input.group.prefix>
+                        <flux:input type="number" wire:model.live.debounce1000ms="form.filters.to_age"
+                            placeholder="50" />
+                    </flux:input.group>
+
+                </flux:field>
+            </div>
+
+        </flux:input.group>
         <flux:fieldset>
             <flux:legend>Programs</flux:legend>
             <div class="flex flex-row items-center gap-4">
@@ -79,6 +109,7 @@
                 <flux:table.column>Gross Monthly Income</flux:table.column>
                 <flux:table.column>Gross Annual Income</flux:table.column>
                 <flux:table.column>Households</flux:table.column>
+                <flux:table.column>Income Type</flux:table.column>
                 <flux:table.column>Income Category (%)</flux:table.column>
             </flux:table.columns>
             <flux:table.rows>
@@ -95,6 +126,7 @@
                         <flux:table.cell>{{ $result->total_income_monthly }}</flux:table.cell>
                         <flux:table.cell>{{ $result->total_income }}</flux:table.cell>
                         <flux:table.cell>{{ $result->household_total }}</flux:table.cell>
+                        <flux:table.cell>{{ $result->incomeType?->name }}</flux:table.cell>
                         <flux:table.cell> @if ($result->income_category)
                             <flux:badge color="green">{{"$result->income_category %" }}</flux:badge>
                         @else

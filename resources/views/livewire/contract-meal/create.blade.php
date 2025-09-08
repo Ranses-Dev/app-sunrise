@@ -1,12 +1,8 @@
 <div>
-    <form wire:submit.prevent="store" class="space-y-6">
-        <x-page-heading title="New Meal Contract" />
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
-            <flux:card>
-                <div class="flex justify-between">
-                    <h3 class="text-lg font-semibold text-gray-900">Client Details</h3>
-                </div>
-                <flux:separator />
+ <x-page-heading title="New Meal Contract" />
+<div class="form">
+    <form wire:submit.prevent="store" >
+                 <x-common.form-header title="Client Details" />
                 <div class="flex flex-row gap-4 justify-end pt-4">
                     <livewire:components.common.client-search-select />
                     @if($client)
@@ -25,14 +21,7 @@
                 @else
                     <p class="text-gray-500 italic p-4">No client selected.</p>
                 @endif
-
-            </flux:card>
-
-            <flux:card class="space-y-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div class="col-span-3">
-                    <flux:heading size="lg">Contract Information</flux:heading>
-                    <flux:separator />
-                </div>
+               <x-common.form-header title="Contract Information" />
                 <div class="col-span-1">
                     <flux:label>Contract Types</flux:label>
                     <flux:select wire:model.live="form.programBranchId" variant="combobox"
@@ -66,7 +55,6 @@
                     <flux:label>Code</flux:label>
                     <flux:input type="text" wire:model="form.code" placeholder="Enter code..." />
                 </div>
-
                 <div class="col-span-1">
                     <flux:label>Delivery Cost</flux:label>
                     <flux:select wire:model="form.deliveryCostId" variant="combobox"
@@ -118,8 +106,7 @@
                     <flux:textarea wire:model="form.notes" placeholder="Enter notes..." />
                     <flux:error name="form.notes" />
                 </div>
-            </flux:card>
-        </div>
+
         <div class="flex justify-end mt-6">
             <flux:button.group class="buttons">
                 <flux:button wire:click="cancel" type="button" icon="x-mark">Cancel</flux:button>
@@ -132,3 +119,5 @@
 
 
 </div>
+</div>
+

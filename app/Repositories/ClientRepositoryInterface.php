@@ -45,4 +45,14 @@ interface ClientRepositoryInterface
     public function getHowpaClientsWithContractActive(): Collection;
 
     public function getClientsHowpa(string|null $search = null): Builder;
+    public function existsHowpaClientNumber(string $howpaClientNumber, ?int $clientId = null): bool;
+
+    public function getClientsAliveCount(): int;
+    public function getClientsIdentificationsDueCount(): int;
+    public function getClientsIdentificationsOverdueCount(): int;
+    public function getClientsCertificationsDueCount(): int;
+    public function getClientsCertificationsOverdueCount(): int;
+    public function clientExistsByIdentification(int $identificationTypeId, string $identificationNumber, int|null $ignoreId): bool;
+
+
 }

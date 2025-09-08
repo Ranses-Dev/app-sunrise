@@ -64,13 +64,13 @@ class Address extends Form
         return [
             'deliveryLine1' => ['required', 'string', 'max:255', function ($attribute, $value, $fail) {
                 if ($this->addressRepository->addressExists([
-                    'deliveryLine1' => $value,
-                    'lastLine' => $this->lastLine,
-                    'streetName' => $this->streetName,
+                    'delivery_line1' => $value,
+                    'last_line' => $this->lastLine,
+                    'street_name' => $this->streetName,
                     'city' => $this->city,
-                    'stateAbbreviation' => $this->stateAbbreviation,
-                    'postalCode' => $this->postalCode,
-                    'countyName' => $this->countyName,
+                    'state_abbreviation' => $this->stateAbbreviation,
+                    'postal_code' => $this->postalCode,
+                    'county_name' => $this->countyName,
                 ], $this->id)) {
                     $fail('This address already exists.');
                 }

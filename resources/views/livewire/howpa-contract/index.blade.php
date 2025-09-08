@@ -29,8 +29,14 @@
             @endif
         </flux:select>
         <flux:date-picker clearable label="Date" mode="range" wire:model.live.debounce1000ms='form.filters.rangeDate' />
+        <flux:date-picker clearable label="Enrollment Day" mode="range"
+            wire:model.live.debounce1000ms='form.filters.rangeEnrollmentDay' />
         <flux:date-picker clearable label="Re-Certification Date" mode="range"
             wire:model.live.debounce1000ms='form.filters.rangeReCertificationDate' />
+        <div class="pt-10">
+            <flux:switch label="Is Active" align="left" wire:model.live="form.filters.isActive" />
+        </div>
+
     </x-common.card-filter>
     <x-common.container-table>
         <flux:table :paginate="$this->form->result()">
@@ -40,6 +46,7 @@
                 <flux:table.column>Program</flux:table.column>
                 <flux:table.column>City</flux:table.column>
                 <flux:table.column>Date</flux:table.column>
+                <flux:table.column>Enrollment Day</flux:table.column>
                 <flux:table.column>Re-Certification Date</flux:table.column>
                 <flux:table.column>Status</flux:table.column>
             </flux:table.columns>
@@ -50,6 +57,7 @@
                         <flux:table.cell>{{ $result->client?->howpa_client_number }}</flux:table.cell>
                         <flux:table.cell>{{ $result->programBranch?->name }}</flux:table.cell>
                         <flux:table.cell>{{ $result->city?->name }}</flux:table.cell>
+                        <flux:table.cell>{{ $result->enrollment_day?->format('m/d/Y') }}</flux:table.cell>
                         <flux:table.cell>{{ $result->date?->format('m/d/Y') }}</flux:table.cell>
                         <flux:table.cell>{{ $result->re_certification_date?->format('m/d/Y') }}</flux:table.cell>
                         <flux:table.cell>
