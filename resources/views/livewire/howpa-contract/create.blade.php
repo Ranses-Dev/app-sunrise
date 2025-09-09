@@ -7,7 +7,7 @@
             <x-common.form-header title="Client Information" />
 
             <flux:heading size="lg">Client Information</flux:heading>
-            <div class="flex flex-row  justify-end items-end">
+            <div class="flex flex-row space-x-4  justify-end items-end">
                 <livewire:components.common.client-search-select />
                 @if($this->form->client)
                     <flux:button wire:click="clearClient" variant="danger" icon="x-mark">Clear Client

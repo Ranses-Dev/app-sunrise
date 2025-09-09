@@ -72,4 +72,9 @@ class Index extends Component
 
         $this->redirect(route('exports.inspections', $this->form->filters));
     }
+
+    public function show(int $id)
+    {
+        $this->redirect(route('inspections.show', ['id' => $id]));
+    }
 }

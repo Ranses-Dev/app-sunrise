@@ -6,36 +6,36 @@
     </div>
     <x-common.card-filter>
 
-            <flux:input label="Search" clearable wire:model.live.debounce.1000ms="form.filters.deliveryLine1"
-                placeholder="Search by address..." />
-            <flux:select label="Cities" variant="combobox" clearable wire:model.live.debounce.1000ms="form.filters.city"
-                placeholder="Cities...">
-                @if ($this->form->cities)
-                    @foreach ($this->form->cities as $city)
-                        <flux:select.option value="{{ $city->city }}">{{ $city->city }}</flux:select.option>
-                    @endforeach
-                @else
-                    <flux:select.option disabled>No cities available</flux:select.option>
-                @endif
-            </flux:select>
-            <flux:select label="Counties" variant="combobox" clearable
-                wire:model.live.debounce.1000ms="form.filters.countyName" placeholder="Counties...">
-                @if ($this->form->counties)
-                    @foreach ($this->form->counties as $county)
-                        <flux:select.option value="{{ $county->county_name }}">{{ $county->county_name }}</flux:select.option>
-                    @endforeach
-                @endif
-            </flux:select>
-            <flux:select label="States" variant="combobox"
-                wire:model.live.debounce.1000ms="form.filters.stateAbbreviation" clearable placeholder="States...">
-                @if ($this->form->states)
-                    @foreach ($this->form->states as $state)
-                        <flux:select.option value="{{ $state->state_abbreviation }}">{{ $state->state_abbreviation }}
-                        </flux:select.option>
-                    @endforeach
-                @endif
-            </flux:select>
-        
+        <flux:input label="Search" clearable wire:model.live.debounce.1000ms="form.filters.deliveryLine1"
+            placeholder="Search by address..." />
+        <flux:select label="Cities" variant="combobox" clearable wire:model.live.debounce.1000ms="form.filters.city"
+            placeholder="Cities...">
+            @if ($this->form->cities)
+                @foreach ($this->form->cities as $city)
+                    <flux:select.option value="{{ $city->city }}">{{ $city->city }}</flux:select.option>
+                @endforeach
+            @else
+                <flux:select.option disabled>No cities available</flux:select.option>
+            @endif
+        </flux:select>
+        <flux:select label="Counties" variant="combobox" clearable
+            wire:model.live.debounce.1000ms="form.filters.countyName" placeholder="Counties...">
+            @if ($this->form->counties)
+                @foreach ($this->form->counties as $county)
+                    <flux:select.option value="{{ $county->county_name }}">{{ $county->county_name }}</flux:select.option>
+                @endforeach
+            @endif
+        </flux:select>
+        <flux:select label="States" variant="combobox" wire:model.live.debounce.1000ms="form.filters.stateAbbreviation"
+            clearable placeholder="States...">
+            @if ($this->form->states)
+                @foreach ($this->form->states as $state)
+                    <flux:select.option value="{{ $state->state_abbreviation }}">{{ $state->state_abbreviation }}
+                    </flux:select.option>
+                @endforeach
+            @endif
+        </flux:select>
+
     </x-common.card-filter>
     <flux:table :paginate="$this->form->results()">
         <flux:table.columns class="text-black p-4">
@@ -57,7 +57,7 @@
                         <flux:dropdown>
                             <flux:button icon:trailing="ellipsis-vertical"></flux:button>
                             <flux:menu>
-                                <flux:menu.item icon="eye">Show</flux:menu.item>
+                                <flux:menu.item icon="eye" wire:click="show({{$result->id}})">Show</flux:menu.item>
                                 <flux:menu.item wire:click="edit({{$result->id}})" icon="pencil-square">Edit
                                 </flux:menu.item>
                                 <flux:menu.item wire:click="delete({{$result->id}})" icon="trash" variant="danger">Delete

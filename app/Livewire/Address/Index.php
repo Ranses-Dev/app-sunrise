@@ -35,6 +35,10 @@ class Index extends Component
     {
         $this->redirect(route('addresses.edit', $id), true);
     }
+    public function show(int $id)
+    {
+        $this->redirect(route('addresses.show', $id), true);
+    }
 
     public function delete($id)
     {

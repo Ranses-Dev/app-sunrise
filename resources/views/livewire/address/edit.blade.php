@@ -1,7 +1,8 @@
 <div>
     <x-page-heading title="Edit Address" />
-    <div class="flex  flex-col justify-center items-center">
-        <form wire:submit.prevent="save" class="form">
+
+    <div class="form">
+        <form wire:submit.prevent="save" >
             <flux:input wire:model="form.deliveryLine1" type="text" label="Address" />
             <flux:input wire:model="form.city" type="text" label="City" />
             <flux:input wire:model="form.stateAbbreviation" type="text" label="State" />

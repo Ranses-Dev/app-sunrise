@@ -94,7 +94,7 @@
                         <flux:dropdown>
                             <flux:button icon:trailing="ellipsis-vertical"></flux:button>
                             <flux:menu>
-                                <flux:menu.item icon="eye">Show</flux:menu.item>
+                                <flux:menu.item icon="eye" wire:click="show({{$result->id}})">Show</flux:menu.item>
                                 <flux:menu.item wire:click="edit({{$result->id}})" icon="pencil-square">Edit
                                 </flux:menu.item>
                                 <flux:menu.item wire:click="delete({{$result->id}})" icon="trash" variant="danger">Delete

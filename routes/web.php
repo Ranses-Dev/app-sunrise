@@ -134,10 +134,12 @@ Route::middleware(['throttle:60,1'])->group(function () {
         Route::get('addresses', \App\Livewire\Address\Index::class)->name('addresses.index');
         Route::get('addresses/create', \App\Livewire\Address\Create::class)->name('addresses.create');
         Route::get('addresses/{id}/edit', \App\Livewire\Address\Edit::class)->name('addresses.edit');
+        Route::get('addresses/{id}/show', \App\Livewire\Address\Show::class)->name('addresses.show');
         //Inspections
         Route::get('inspections', \App\Livewire\Inspection\Index::class)->name('inspections.index');
         Route::get('inspections/create', \App\Livewire\Inspection\Create::class)->name('inspections.create');
         Route::get('inspections/{id}/edit', \App\Livewire\Inspection\Edit::class)->name('inspections.edit');
+        Route::get('inspections/{id}/show', \App\Livewire\Inspection\Show::class)->name('inspections.show');
     });
     Route::prefix('exports')->as('exports.')->group(function () {
         //Exports

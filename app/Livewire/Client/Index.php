@@ -70,4 +70,10 @@ class Index extends Component
     {
         return $this->redirect(url: route('statistics.clients.pdfs.list', ["filters" => $this->form->filters]), navigate: false);
     }
+
+    public function show(int $id)
+    {
+        return $this->redirect(route('clients.show', $id), navigate: true);
+    }
+    
 }

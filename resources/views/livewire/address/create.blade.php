@@ -1,7 +1,7 @@
 <div>
 <x-page-heading title="New Address" />
-<div class="flex  flex-col justify-center items-center w-full">
-    <form wire:submit.prevent="create" class="form">
+<div class="form">
+    <form wire:submit.prevent="create"  >
 
         <flux:input wire:model="form.deliveryLine1" type="text" label="Address" />
         <flux:input wire:model="form.city" type="text" label="City" />

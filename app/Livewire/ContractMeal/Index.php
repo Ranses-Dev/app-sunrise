@@ -63,11 +63,15 @@ class Index extends Component
 
     public function export()
     {
-        $this->redirect(url:route('exports.contract-meals', ["filters" => $this->form->filters]));
+        $this->redirect(url: route('exports.contract-meals', ["filters" => $this->form->filters]));
     }
     #[On('reset-filters')]
     public function resetFilters()
     {
         $this->form->reset('filters');
+    }
+    public function show(int $id)
+    {
+        return $this->redirect(route('contract-meals.show', $id), navigate: true);
     }
 }

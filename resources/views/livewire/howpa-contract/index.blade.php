@@ -1,5 +1,5 @@
 <div class="space-y-4">
-    <x-page-heading title="HOPWA Contracts" />
+    <x-page-heading title="HOWPA Contracts" />
     <div class="flex justify-end">
 
         @can('create', \App\Models\HowpaContract::class)
@@ -70,7 +70,7 @@
                                 <flux:button icon:trailing="ellipsis-vertical"></flux:button>
                                 <flux:menu>
                                     @can('view', $result)
-                                        <flux:menu.item icon="eye">Show</flux:menu.item>
+                                        <flux:menu.item icon="eye" wire:click='show({{ $result->id }})'>Show</flux:menu.item>
                                     @endcan
                                     @can('update', $result)
                                         <flux:menu.item wire:click="edit({{$result->id}})" icon="pencil-square">Edit
