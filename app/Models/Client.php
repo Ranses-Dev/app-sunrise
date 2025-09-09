@@ -183,6 +183,15 @@ class Client extends Model
         $query->when(filled($filters['income_type_id'] ?? null), function (Builder $q) use ($filters) {
             $q->where('income_type_id', (int) $filters['income_type_id']);
         });
+        if (filled($filters['city_district_id'] ?? null)) {
+            $query->where('city_district_id', (int) $filters['city_district_id']);
+        }
+        if (filled($filters['countyDistrictId'] ?? null)) {
+            $query->where('county_district_id', (int) $filters['countyDistrictId']);
+        }
+        if (filled($filters['city_id'] ?? null)) {
+            $query->where('city_id', (int) $filters['city_id']);
+        }
         return $query;
     }
     public function scopeSsn(Builder $query, string|null $ssn): Builder

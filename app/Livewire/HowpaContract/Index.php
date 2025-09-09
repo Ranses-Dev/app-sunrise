@@ -27,8 +27,9 @@ class Index extends Component
     {
         $this->form->getProgramBranches();
         $this->form->getClientServiceSpecialists();
+        $this->form->getCityDistricts();
+        $this->form->getCountyDistricts();
     }
-
 
     public function create()
     {
@@ -75,6 +76,9 @@ class Index extends Component
     {
         $this->redirect(route('howpa.contracts.show', $id), true);
     }
-
-
+    public function updatedFormFiltersCountyDistrictId()
+    {
+        $this->form->reset('filters.cityId');
+        $this->form->getCitiesFilter();
+    }
 }

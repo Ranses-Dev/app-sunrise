@@ -118,6 +118,20 @@ class HowpaContract extends Model
         $query->when(isset($filters['isActive']), function ($q) use ($filters) {
             $q->where('is_active', $filters['isActive']);
         });
+        if (filled($filters['cityDistrictId'] ?? null)) {
+            $query->whereHas('client', function ($q) use ($filters) {
+                $q->where('city_district_id', (int) $filters['cityDistrictId']);
+            });
+        }
+        if (filled($filters['countyDistrictId'] ?? null)) {
+            $query->whereHas('client', function ($q) use ($filters) {
+                $q->where('county_district_id', (int) $filters['countyDistrictId']);
+            });
+        }
+        if (filled($filters['cityId'] ?? null)) {
+            $query->where('city_id', (int) $filters['cityId']);
+        }
+
 
         return $query;
     }

@@ -61,6 +61,29 @@
                 @endforeach
             @endif
         </flux:select>
+        <flux:select wire:model.live="form.filters.city_district_id" variant="listbox" clearable searchable
+            label="City District" filter>
+            @foreach ($this->form->cityDistricts as $cityDistrict)
+                <flux:select.option value="{{ $cityDistrict->id }}" wire:key="{{ $cityDistrict->id }}">
+                    {{ $cityDistrict->name }}
+                </flux:select.option>
+            @endforeach
+        </flux:select>
+        <flux:select wire:model.live="form.filters.countyDistrictId" variant="listbox" clearable searchable
+            label="County District" filter>
+            @foreach ($this->form->countyDistricts as $countyDistrict)
+                <flux:select.option value="{{ $countyDistrict->id }}" wire:key="{{ $countyDistrict->id }}">
+                    {{ $countyDistrict->name }}
+                </flux:select.option>
+            @endforeach
+        </flux:select>
+        <flux:select wire:model.live="form.filters.city_id" variant="listbox" clearable searchable label="City" filter>
+            @foreach ($this->form->citiesFiltered ?? [] as $city)
+                <flux:select.option value="{{ $city->id }}" wire:key="{{ $city->id }}">
+                    {{ $city->name }}
+                </flux:select.option>
+            @endforeach
+        </flux:select>
         <flux:input.group class="flex flex-col">
             <div>
                 <flux:label>Age Range</flux:label>

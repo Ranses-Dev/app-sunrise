@@ -76,6 +76,7 @@ class Client extends Form
     public $cityDistricts = null;
     public $countyDistricts = null;
     public $cities = null;
+    public $citiesFiltered = null;
     public $healthcareProviders = null;
     public $healthcareProviderPlans = null;
     public $genders = null;
@@ -111,6 +112,9 @@ class Client extends Form
         'has_meals' => false,
         'from_age' => null,
         'to_age' => null,
+        'city_district_id' => null,
+        'countyDistrictId' => null,
+        'city_id' => null
     ];
 
     public function boot()
@@ -388,6 +392,11 @@ class Client extends Form
     public function getCities()
     {
         $this->cities = $this->cityRepository->getCityByDistrictId($this->countyDistrictId);
+    }
+
+    public function getCitiesFiltered()
+    {
+        $this->citiesFiltered = $this->cityRepository->getCityByDistrictId($this->filters['countyDistrictId']);
     }
     public function getHealthcareProviders()
     {

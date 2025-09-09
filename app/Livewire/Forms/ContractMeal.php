@@ -18,6 +18,9 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
+use App\Repositories\CityDistrictRepositoryInterface as CityDistrictRepository;
+use App\Repositories\CountyDistrictRepositoryInterface as CountyDistrictRepository;
+use App\Repositories\CityRepositoryInterface as CityRepository;
 
 class ContractMeal extends Form
 {
@@ -34,11 +37,17 @@ class ContractMeal extends Form
     public ?string $notes = null;
     public ?string $code = null;
 
-    public array $filters = [
-        'search',
-        'clientServiceSpecialistId',
-        'programBranchId'
+    public $filters = [
+        'search'=>null,
+        'clientServiceSpecialistId'=>null,
+        'programBranchId'=>null,
+        'countyDistrictId'=>null,
+        'cityDistrictId'=>null,
+        'cityId'=>null
     ];
+    public $cityDistricts = null;
+    public $countyDistricts = null;
+    public $cities = null;
 
 
     public Collection $programBranches;
@@ -53,21 +62,21 @@ class ContractMeal extends Form
     protected TerminationReasonRepositoryInterface $terminationReasonRepository;
     protected ContractMealRepositoryInterface $contractMealRepository;
     protected ClientRepositoryInterface $clientRepository;
-    public function boot(
-        DeliveryCostRepositoryInterface $deliveryCostRepository,
-        FoodCostRepositoryInterface $foodCostRepository,
-        ProgramDeliveryCostRepositoryInterface $programDeliveryCostRepository,
-        TerminationReasonRepositoryInterface $terminationReasonRepository,
-        ContractMealRepositoryInterface $contractMealRepository,
-        ClientRepositoryInterface $clientRepository
-    ) {
+    protected CityDistrictRepository $cityDistrictRepository;
+    protected CountyDistrictRepository $countyDistrictRepository;
+    protected CityRepository $cityRepository;
+    public function boot()
+    {
 
-        $this->deliveryCostRepository = $deliveryCostRepository;
-        $this->foodCostRepository = $foodCostRepository;
-        $this->programDeliveryCostRepository = $programDeliveryCostRepository;
-        $this->terminationReasonRepository = $terminationReasonRepository;
-        $this->contractMealRepository = $contractMealRepository;
-        $this->clientRepository = $clientRepository;
+        $this->deliveryCostRepository = app(DeliveryCostRepositoryInterface::class);
+        $this->foodCostRepository = app(FoodCostRepositoryInterface::class);
+        $this->programDeliveryCostRepository = app(ProgramDeliveryCostRepositoryInterface::class);
+        $this->terminationReasonRepository = app(TerminationReasonRepositoryInterface::class);
+        $this->contractMealRepository = app(ContractMealRepositoryInterface::class);
+        $this->clientRepository = app(ClientRepositoryInterface::class);
+        $this->cityDistrictRepository = app(CityDistrictRepository::class);
+        $this->countyDistrictRepository = app(CountyDistrictRepository::class);
+        $this->cityRepository = app(CityRepository::class);
     }
 
 
@@ -233,5 +242,17 @@ class ContractMeal extends Form
     public function results(): LengthAwarePaginator
     {
         return $this->contractMealRepository->getFiltered($this->filters)->paginate(pageName: 'contract-meals-page');
+    }
+    public function getCityDistricts()
+    {
+        $this->cityDistricts =   $this->cities = $this->cityDistrictRepository->getAll();
+    }
+    public function getCountyDistricts()
+    {
+        $this->countyDistricts = $this->countyDistrictRepository->getAll();
+    }
+    public function getCities()
+    {
+        $this->cities = $this->cityRepository->getCityByDistrictId($this->filters['countyDistrictId'] ?? null);
     }
 }

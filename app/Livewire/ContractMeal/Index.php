@@ -12,12 +12,13 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use App\Livewire\Forms\ContractMeal as ContractMealForm;
+use Illuminate\Support\Facades\Log;
 
 #[Title('Contract Meals')]
 class Index extends Component
 {
     use WithPagination, WithoutUrlPagination;
-    public string $search = '';
+
     public ?int $idToDelete = null;
     public ContractMealForm $form;
 
@@ -25,6 +26,8 @@ class Index extends Component
     {
         $this->form->loadClientServiceSpecialists();
         $this->form->loadProgramBranches();
+        $this->form->getCityDistricts();
+        $this->form->getCountyDistricts();
     }
 
     public function render()
@@ -73,5 +76,11 @@ class Index extends Component
     public function show(int $id)
     {
         return $this->redirect(route('contract-meals.show', $id), navigate: true);
+    }
+    public function updatedFormFiltersCountyDistrictId()
+    {
+    
+        $this->form->reset('filters.cityId');
+        $this->form->getCities();
     }
 }

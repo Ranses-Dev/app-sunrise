@@ -28,6 +28,29 @@
                 @endforeach
             @endif
         </flux:select>
+        <flux:select wire:model.live="form.filters.cityDistrictId" variant="listbox" clearable searchable
+            label="City District" filter>
+            @foreach ($this->form->cityDistrictsFilter as $cityDistrict)
+                <flux:select.option value="{{ $cityDistrict->id }}" wire:key="{{ $cityDistrict->id }}">
+                    {{ $cityDistrict->name }}
+                </flux:select.option>
+            @endforeach
+        </flux:select>
+        <flux:select wire:model.live="form.filters.countyDistrictId" variant="listbox" clearable searchable
+            label="County District" filter>
+            @foreach ($this->form->countyDistrictsFilter as $countyDistrict)
+                <flux:select.option value="{{ $countyDistrict->id }}" wire:key="{{ $countyDistrict->id }}">
+                    {{ $countyDistrict->name }}
+                </flux:select.option>
+            @endforeach
+        </flux:select>
+        <flux:select wire:model.live="form.filters.cityId" variant="listbox" clearable searchable label="City" filter>
+            @foreach ($this->form->citiesFilter ?? [] as $city)
+                <flux:select.option value="{{ $city->id }}" wire:key="{{ $city->id }}">
+                    {{ $city->name }}
+                </flux:select.option>
+            @endforeach
+        </flux:select>
         <flux:date-picker clearable label="Date" mode="range" wire:model.live.debounce1000ms='form.filters.rangeDate' />
         <flux:date-picker clearable label="Enrollment Day" mode="range"
             wire:model.live.debounce1000ms='form.filters.rangeEnrollmentDay' />

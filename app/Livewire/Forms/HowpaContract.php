@@ -18,6 +18,9 @@ use App\Models\Client;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as SupportCollection;
 use App\Models\EmergencyContact;
+use App\Repositories\CityDistrictRepositoryInterface as CityDistrictRepository;
+use App\Repositories\CountyDistrictRepositoryInterface as CountyDistrictRepository;
+use App\Repositories\CityRepositoryInterface as CityRepository;
 
 
 class HowpaContract extends Form
@@ -61,7 +64,9 @@ class HowpaContract extends Form
     public ?int $clientServiceSpecialistId = null;
     public ?string $howpaSsn = null;
     public bool $isActive = true;
-
+    public $cityDistrictsFilter = null;
+    public $countyDistrictsFilter = null;
+    public $citiesFilter = null;
     public array $filters = [
         'programBranchId' => null,
         'clientId' => null,
@@ -70,6 +75,9 @@ class HowpaContract extends Form
         'rangeReCertificationDate' => null,
         'rangeEnrollmentDay' => null,
         'isActive' => true,
+        'countyDistrictId' => null,
+        'cityDistrictId' => null,
+        'cityId' => null
     ];
     public ?Collection $emergencyContacts = null;
     public ?int $emergencyContactId = null;
@@ -79,10 +87,12 @@ class HowpaContract extends Form
     public ?EmergencyContact $emergencyContactTwo = null;
     protected HowpaContractRepositoryInterface $howpaContractRepository;
     protected ClientRepositoryInterface $clientRepository;
-    protected CityRepositoryInterface $cityRepository;
     protected ClientPhoneNumberRepositoryInterface $clientPhoneNumberRepository;
     protected EmergencyContactRepositoryInterface $emergencyContactRepository;
     protected IncomeTypeRepositoryInterface $incomeTypeRepository;
+    protected CityDistrictRepository $cityDistrictRepository;
+    protected CountyDistrictRepository $countyDistrictRepository;
+    protected CityRepository $cityRepository;
     public function boot()
     {
         $this->howpaContractRepository = app(HowpaContractRepositoryInterface::class);
@@ -91,6 +101,9 @@ class HowpaContract extends Form
         $this->clientPhoneNumberRepository = app(ClientPhoneNumberRepositoryInterface::class);
         $this->emergencyContactRepository = app(EmergencyContactRepositoryInterface::class);
         $this->incomeTypeRepository = app(IncomeTypeRepositoryInterface::class);
+        $this->cityDistrictRepository = app(CityDistrictRepository::class);
+        $this->countyDistrictRepository = app(CountyDistrictRepository::class);
+        $this->cityRepository = app(CityRepository::class);
     }
     public function rules()
     {
@@ -421,5 +434,18 @@ class HowpaContract extends Form
     public function getIncomeTypes()
     {
         $this->incomeTypes = $this->incomeTypeRepository->getAll();
+    }
+
+    public function getCityDistricts()
+    {
+        $this->cityDistrictsFilter =   $this->cities = $this->cityDistrictRepository->getAll();
+    }
+    public function getCountyDistricts()
+    {
+        $this->countyDistrictsFilter = $this->countyDistrictRepository->getAll();
+    }
+    public function getCitiesFilter()
+    {
+        $this->citiesFilter = $this->cityRepository->getCityByDistrictId($this->filters['countyDistrictId'] ?? null);
     }
 }

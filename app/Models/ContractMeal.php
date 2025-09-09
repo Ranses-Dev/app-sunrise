@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class ContractMeal extends Model
@@ -28,17 +29,32 @@ class ContractMeal extends Model
     ];
     public function scopeSearch(Builder $query, array $filters): Builder
     {
-        if (isset($filters['search']) && filled($filters['search'])) {
+        if (filled($filters['search'] ?? null)) {
             $search = $filters['search'];
-            $query->with('client');
-            $query->where(function ($query) use ($search) {
-                $query->where('notes', 'like', "%$search%")
-                    ->orWhere('code', 'like', "%$search%")
-                    ->orWhereHas('client', function ($query) use ($search) {
-                        $query->where('first_name', 'like', "%$search%")
-                         ->orWhere('last_name', 'like', "%$search%");
+            $query->where(function ($q) use ($search) {
+                $q->where('code', 'like', "%$search%")
+                    ->orWhereHas('client', function ($q) use ($search) {
+                        $q->where('first_name', 'like', "%$search%")
+                            ->orWhere('last_name', 'like', "%$search%");
                     });
             });
+        }
+
+        if (filled($filters['clientServiceSpecialistId'] ?? null)) {
+            $query->where('client_service_specialist_id', (int) $filters['clientServiceSpecialistId']);
+        }
+        if (filled($filters['cityDistrictId'] ?? null)) {
+            $query->whereHas('client', function ($q) use ($filters) {
+                $q->where('city_district_id', (int) $filters['cityDistrictId']);
+            });
+        }
+        if (filled($filters['countyDistrictId'] ?? null)) {
+            $query->whereHas('client', function ($q) use ($filters) {
+                $q->where('county_district_id', (int) $filters['countyDistrictId']);
+            });
+        }
+        if (filled($filters['cityId'] ?? null)) {
+            $query->where('city_id', (int) $filters['cityId']);
         }
         if (isset($filters['programBranchId']) && filled($filters['programBranchId'])) {
             $query->where('program_branch_id', $filters['programBranchId']);

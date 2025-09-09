@@ -64,17 +64,17 @@ class Index extends Component
 
     public function edit(int $id)
     {
-        $this->redirect(route('inspections.edit', ['id' => $id]));
+        $this->redirect(route('inspections.edit', ['id' => $id]),true);
     }
 
     public function export()
     {
 
-        $this->redirect(route('exports.inspections', $this->form->filters));
+        $this->redirect(route('exports.inspections', $this->form->filters),true);
     }
 
     public function show(int $id)
     {
-        $this->redirect(route('inspections.show', ['id' => $id]));
+        $this->redirect(route('inspections.show', ['id' => $id]),true);
     }
 }

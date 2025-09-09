@@ -11,6 +11,7 @@ use App\Livewire\Forms\Client as ClientForm;
 use App\Models\Client;
 use Flux\Flux;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 
@@ -30,6 +31,9 @@ class Index extends Component
         $this->form->getHealthcareProviders();
         $this->form->getGenders();
         $this->form->getIncomeTypes();
+        $this->form->getCityDistricts();
+        $this->form->getCountyDistricts();
+
     }
     public function render()
     {
@@ -75,5 +79,10 @@ class Index extends Component
     {
         return $this->redirect(route('clients.show', $id), navigate: true);
     }
-    
+    public function updatedFormFiltersCountyDistrictId()
+    {
+
+        $this->form->reset('filters.city_id');
+        $this->form->getCitiesFiltered();
+    }
 }
