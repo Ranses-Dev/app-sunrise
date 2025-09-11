@@ -63,6 +63,7 @@
                     wire:model='form.inspectionRequestedNotScheduledNotes' />
             </div>
         </div>
+       
        <flux:input label="Landlord Name" wire:model='form.landlordName' />
       <flux:input label="Landlord Contact Information" wire:model='form.landlordContactInformation'/>
 

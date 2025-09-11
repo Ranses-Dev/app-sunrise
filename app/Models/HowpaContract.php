@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Enums\RecentLivingSituation;
+use App\Traits\ConvertFormatCurrency;
+use App\Traits\ConvertToDateStandard;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -9,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class HowpaContract extends Model
 {
+    use ConvertFormatCurrency, ConvertToDateStandard;
     protected $fillable = [
         'agreed_statements',
         'assets_notes',
@@ -56,6 +60,8 @@ class HowpaContract extends Model
         'has_checking_account' => 'boolean',
         'has_savings' => 'boolean',
 
+
+
     ];
 
     public function client(): BelongsTo
@@ -80,6 +86,24 @@ class HowpaContract extends Model
     }
     public function scopeSearch(Builder $query, array $filters): Builder
     {
+        $query->with([
+            'client.legalStatus',
+            'client.identificationType',
+            'client.incomeType',
+            'client.cityDistrict',
+            'client.countyDistrict',
+            'client.city',
+            'client.healthcareProvider',
+            'client.healthcareProviderPlan',
+            'client.howpaContracts',
+            'client.contractMeals',
+            'client.housingStatus',
+            'programBranch',
+            'clientServiceSpecialist',
+            'emergencyContactOne',
+            'emergencyContactTwo',
+            'city'
+        ]);
         if (isset($filters['search']) && filled($filters['search'])) {
             $query->whereHas('client', function (Builder $q) use ($filters) {
                 $q->where('ssn', 'like', "%{$filters['search']}%")
@@ -139,5 +163,19 @@ class HowpaContract extends Model
     public function clientServiceSpecialist(): BelongsTo
     {
         return $this->belongsTo(User::class, 'client_service_specialist_id');
+    }
+    public function getRecentLivingSituationFormattedAttribute(): string
+    {
+        return filled($this->recent_living_situation) ?
+            RecentLivingSituation::fromEither($this->recent_living_situation)->label() : '';
+    }
+
+    public function getSavingsBalanceFormattedAttribute(): string
+    {
+        return $this->convertToCurrencyFormat($this->savings_balance);
+    }
+    public function getCheckingAvgBalanceSixMonthsFormattedAttribute(): string
+    {
+        return $this->convertToCurrencyFormat($this->checking_avg_balance_six_months);
     }
 }

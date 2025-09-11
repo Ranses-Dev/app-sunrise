@@ -8,7 +8,6 @@ use Livewire\WithoutUrlPagination;
 use Livewire\WithPagination;
 use App\Livewire\Forms\Inspection as InspectionForm;
 use Flux\Flux;
-use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 
@@ -33,6 +32,8 @@ class Index extends Component
         $this->form->getHousingTypes();
         $this->form->getStatuses();
         $this->form->getUsers();
+        $this->form->getColumnsDefault();
+        $this->form->getColumnsOptions();
     }
 
     public function delete($id)
@@ -64,17 +65,27 @@ class Index extends Component
 
     public function edit(int $id)
     {
-        $this->redirect(route('inspections.edit', ['id' => $id]),true);
+        $this->redirect(route('inspections.edit', ['id' => $id]), true);
     }
 
     public function export()
     {
 
-        $this->redirect(route('exports.inspections', $this->form->filters),true);
+        $this->redirect(route('exports.inspections', ["filters"=>$this->form->filters,"columns"=>$this->form->columnsSelected]));
+    }
+
+    public function exportExcel()
+    {
+        $this->redirect(route('exports.excel.inspections', ["filters"=>$this->form->filters,"columns"=>$this->form->columnsSelected]));
     }
 
     public function show(int $id)
     {
-        $this->redirect(route('inspections.show', ['id' => $id]),true);
+        $this->redirect(route('inspections.show', ['id' => $id]), true);
+    }
+    #[On('columns-updated')]
+    public function updateColumns(array $columnsSelected)
+    {
+        $this->form->columnsSelected = $columnsSelected;
     }
 }

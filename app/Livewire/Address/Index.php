@@ -83,4 +83,10 @@ class Index extends Component
         $this->form->getStatesRegistered();
         $this->form->getCountiesRegistered();
     }
+    #[On('reset-filters')]
+    public function resetFilters()
+    {
+        $this->form->resetFilters();
+        $this->loadFilters();
+    }
 }

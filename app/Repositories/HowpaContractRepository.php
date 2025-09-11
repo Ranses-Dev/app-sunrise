@@ -6,7 +6,7 @@ use App\Models\HowpaContract;
 use App\Models\Program;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-
+use Illuminate\Support\Facades\Log;
 
 class HowpaContractRepository implements HowpaContractRepositoryInterface
 {
@@ -16,7 +16,8 @@ class HowpaContractRepository implements HowpaContractRepositoryInterface
     }
     public function getFiltered(array $filters): Builder
     {
-        return HowpaContract::with(['client', 'programBranch'])->search($filters);
+        Log::info('Filters: ', $filters);
+        return HowpaContract::search($filters);
     }
     public function findById(int $id): ?HowpaContract
     {

@@ -1,5 +1,4 @@
-
-<x-layouts.statistics :title="'Inspections'">
+<x-layouts.statistics :title="'Addresses'">
     <div class="table-container">
         <table class="table-custom">
             <thead>
@@ -70,7 +69,7 @@
             <tbody>
                 @foreach ($inspections as $inspection)
                     <tr>
-                       @if (in_array('address', $columns))
+                        @if (in_array('address', $columns))
                             <td>{{ $inspection->address?->address_formatted }}</td>
                         @endif
                         @if (in_array('program_branch', $columns))

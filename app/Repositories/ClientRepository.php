@@ -204,8 +204,11 @@ class ClientRepository implements ClientRepositoryInterface
     }
     public function getClientsHowpa(string|null $search = null): Builder
     {
+        $filters = [
+            'search' => $search
+        ];
         return Client::whereHas('howpaContracts')
-            ->search($search);
+            ->search($filters);
     }
 
     public function existsHowpaClientNumber(string $howpaClientNumber, ?int $clientId = null): bool

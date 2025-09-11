@@ -4,20 +4,20 @@ namespace App\Livewire\Forms;
 
 use App\Enums\CrudMessages;
 use App\Enums\InspectionStatus;
-use Livewire\Attributes\Validate;
 use Livewire\Form;
 use Illuminate\Database\Eloquent\Collection;
+use Flux\Flux;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Validation\Rule;
+use Livewire\Attributes\Computed;
 use App\Repositories\AddressRepositoryInterface as AddressRepository;
 use App\Repositories\InspectionRepositoryInterface as InspectionRepository;
 use App\Repositories\ClientRepositoryInterface as ClientRepository;
 use App\Repositories\ProgramBranchRepositoryInterface as ProgramBranchRepository;
 use App\Repositories\HousingTypeRepositoryInterface as HousingTypeRepository;
 use App\Repositories\UserRepositoryInterface as UserRepository;
-use Flux\Flux;
-use Illuminate\Pagination\LengthAwarePaginator;
+use App\Enums\InspectionColumns;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\Rule;
-use Livewire\Attributes\Computed;
 
 class Inspection extends Form
 {
@@ -86,6 +86,9 @@ class Inspection extends Form
         'inspectionStatus' => null,
         'housingInspectorId' => null,
     ];
+    public array $columnsSelected = [];
+    public array $columns = [];
+
     protected InspectionRepository $inspectionRepository;
     protected AddressRepository $addressRepository;
     protected ClientRepository $clientRepository;
@@ -139,14 +142,10 @@ class Inspection extends Form
             ],
 
             'landlordAddressId' => ['nullable', self::EXISTS_ADDRESS],
-            'landlordHowpaId' => ['nullable', 'exists:howpa,id', 'prohibited_unless:programBranchId,7'],
+            'landlordHowpaId' => ['nullable', 'exists:clients,id', 'prohibited_unless:programBranchId,7'],
 
             'tenantName' => ['nullable', 'string'],
-            'tenantHowpaId' => ['nullable', 'exists:howpa,id', 'prohibited_unless:programBranchId,7', function ($attribute, $value, $fail) {
-                if ($value && $value !== $this->addressId) {
-                    $fail("The tenant Howpa ID field must be the same as the inspection address selected.");
-                }
-            }],
+            'tenantHowpaId' => ['nullable', 'exists:clients,id', 'prohibited_unless:programBranchId,7'],
             'tenantContactInformation' => ['nullable', 'string'],
             'tenantAddressId' => ['nullable', self::EXISTS_ADDRESS, function ($attribute, $value, $fail) {
                 if ($value && $value !== $this->addressId) {
@@ -336,22 +335,7 @@ class Inspection extends Form
     #[Computed]
     public function showButtonsSelectClientsFromHowpa(): bool
     {
-        if ($this->tenantHowpaId) {
-            $this->reset([
-                'tenantHowpaId',
-                'tenantName',
-                'tenantContactInformation',
-                'tenantAddressId',
-            ]);
-        }
-        if ($this->landlordHowpaId) {
-            $this->reset([
-                'landlordHowpaId',
-                'landlordName',
-                'landlordContactInformation',
-                'landlordAddressId',
-            ]);
-        }
+
         return $this->programBranchId === (int)config('services.program_branches.howpas_id');
     }
 
@@ -365,11 +349,11 @@ class Inspection extends Form
         ]);
         if ($this->landlordHowpaId && $landlord = $this->clientRepository->findById($this->landlordHowpaId)) {
             $this->landlordName = $landlord->full_name;
-            $this->landlordHowpaId = $landlord->howpa_id;
+            $this->landlordHowpaId = $landlord->id;
             $this->landlordContactInformation = $landlord->email;
             $this->landlordAddressId = $landlord->address_id;
             $this->getLandlordAddressById();
-        }
+               }
     }
     public function getTenantById()
     {
@@ -381,7 +365,7 @@ class Inspection extends Form
         ]);
         if ($this->tenantHowpaId && $tenant = $this->clientRepository->findById($this->tenantHowpaId)) {
             $this->tenantName = $tenant->full_name;
-            $this->tenantHowpaId = $tenant->howpa_id;
+            $this->tenantHowpaId = $tenant->id;
             $this->tenantContactInformation = $tenant->email;
             $this->tenantAddressId = $tenant->address_id;
             $this->getTenantAddressById();
@@ -399,5 +383,22 @@ class Inspection extends Form
             'filters.inspectionRequestedNotScheduled',
             'filters.inspectionStatus',
         ]);
+    }
+    public function getColumnsDefault()
+    {
+        $this->columnsSelected = collect(InspectionColumns::options())
+            ->filter(fn($column) => ($column['default'] ?? false) === true)
+            ->pluck('value')
+            ->all();
+    }
+    public function getColumnsOptions()
+    {
+        $this->columns = collect(InspectionColumns::options())
+            ->map(fn($column) => [
+                'value' => $column['value'],
+                'label' => $column['label'],
+                'default' => $column['default'] ?? false,
+            ])
+            ->all();
     }
 }

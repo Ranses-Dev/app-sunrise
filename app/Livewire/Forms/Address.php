@@ -98,6 +98,7 @@ class Address extends Form
     {
         $this->validate($this->rules(), $this->messages());
         $data = $this->verifyAddress();
+        Log::info('Verified Address: ', ['data' => $data]);
         if (!$data || $this->addressRepository->addressExists($data, $this->id)) {
             $this->addError('deliveryLine1', 'The address is invalid or already exists.');
 
@@ -147,5 +148,18 @@ class Address extends Form
     public function getCountiesRegistered()
     {
         $this->counties = $this->addressRepository->getCountiesRegistered();
+    }
+
+    public function resetFilters()
+    {
+        $this->filters = [
+            'deliveryLine1' => null,
+            'lastLine' => null,
+            'streetName' => null,
+            'city' => null,
+            'stateAbbreviation' => null,
+            'postalCode' => null,
+            'countyName' => null,
+        ];
     }
 }

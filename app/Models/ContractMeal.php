@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\ConvertToDateStandard;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,6 +11,7 @@ use Illuminate\Support\Str;
 
 class ContractMeal extends Model
 {
+    use ConvertToDateStandard;
     protected $fillable = [
         'client_id',
         'program_branch_id',
@@ -29,6 +31,25 @@ class ContractMeal extends Model
     ];
     public function scopeSearch(Builder $query, array $filters): Builder
     {
+        $query->with([
+            'client.legalStatus',
+            'client.identificationType',
+            'client.incomeType',
+            'client.cityDistrict',
+            'client.countyDistrict',
+            'client.city',
+            'client.healthcareProvider',
+            'client.healthcareProviderPlan',
+            'client.howpaContracts',
+            'client.contractMeals',
+            'client.housingStatus',
+            'mealContractType',
+            'clientServiceSpecialist',
+            'deliveryCost',
+            'foodCost',
+            'programDeliveryCost',
+            'terminationReason',
+        ]);
         if (filled($filters['search'] ?? null)) {
             $search = $filters['search'];
             $query->where(function ($q) use ($search) {
@@ -54,11 +75,14 @@ class ContractMeal extends Model
             });
         }
         if (filled($filters['cityId'] ?? null)) {
-            $query->where('city_id', (int) $filters['cityId']);
+            $query->whereHas('client', function ($q) use ($filters) {
+                $q->where('city_id', (int) $filters['cityId']);
+            });
         }
         if (isset($filters['programBranchId']) && filled($filters['programBranchId'])) {
             $query->where('program_branch_id', $filters['programBranchId']);
         }
+        $query->addSelect('');
         return $query;
     }
     public function client(): BelongsTo
@@ -110,5 +134,14 @@ class ContractMeal extends Model
     public function clientServiceSpecialist(): BelongsTo
     {
         return $this->belongsTo(User::class, 'client_service_specialist_id');
+    }
+    public function getClientServiceSpecialistNameAttribute(): string
+    {
+        return $this->clientServiceSpecialist ? $this->clientServiceSpecialist->name : "";
+    }
+
+    public function getRecertificationDateFormattedAttribute(): ?string
+    {
+        return $this->convertToDateStandard($this->recertification_date);
     }
 }

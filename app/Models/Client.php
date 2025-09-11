@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\PaymentFrequency;
+use App\Traits\ConvertFormatCurrency;
 use App\Traits\ImageHandler;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -12,13 +13,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Number;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class Client extends Model
 {
-    use ImageHandler, LogsActivity;
+    use ImageHandler, LogsActivity, ConvertFormatCurrency;
     protected $fillable = [
         'address_id',
         'city_district_id',
@@ -51,24 +53,30 @@ class Client extends Model
         'payment_amounts',
         'ssn',
         'hispanic',
-        'income_type_id'
+        'income_type_id',
+        'income'
 
     ];
     protected $casts = [
-        'dob' => 'date:Y-m-d',
-        'effective_date' => 'date:Y-m-d',
+        'dob' => 'date',
+        'effective_date' => 'date',
         'identification_expiration_date' => 'date',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
-        'income' => 'decimal:2',
         'monthly_client_payment_portion' => 'decimal:2',
         'is_deceased' => 'boolean',
         'payment_amounts' => 'array',
         'frequency_payment' => 'string',
+        'income' => 'decimal:2',
 
 
     ];
     protected $appends = ["age"];
+
+    public function getIncomeFormattedAttribute(): string
+    {
+        return  $this->convertToCurrencyFormat($this->income);
+    }
 
     public function getActivitylogOptions(): LogOptions
     {
@@ -78,7 +86,14 @@ class Client extends Model
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
     }
-
+    public function getEffectiveDateFormattedAttribute(): string
+    {
+        return $this->effective_date ? $this->effective_date->format('m-d-Y') : '';
+    }
+    public function getIdentificationExpirationDateFormattedAttribute(): string
+    {
+        return $this->identification_expiration_date ? $this->identification_expiration_date->format('m-d-Y') : '';
+    }
     public function legalStatus(): BelongsTo
     {
         return $this->belongsTo(LegalStatus::class);
@@ -123,10 +138,11 @@ class Client extends Model
     }
     public function scopeSearch(Builder $query, array $filters): Builder
     {
-        $query->with(['legalStatus', 'identificationType', 'incomeType', 'cityDistrict', 'countyDistrict', 'city', 'healthcareProvider', 'healthcareProviderPlan', 'howpaContracts', 'contractMeals']);
-        $query->when(filled($filters['search'] ?? null), function (Builder $q) use ($filters) {
+
+        $query->with(['legalStatus', 'identificationType', 'incomeType', 'cityDistrict', 'countyDistrict', 'city', 'healthcareProvider', 'healthcareProviderPlan', 'howpaContracts', 'contractMeals', 'housingStatus']);
+        if (filled($filters['search']) && !empty($filters['search'])) {
             $search = $filters['search'];
-            $q->where(function (Builder $qq) use ($search) {
+            $query->where(function (Builder $qq) use ($search) {
                 $qq->where('first_name', 'like', "%{$search}%")
                     ->orWhere('last_name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%")
@@ -140,7 +156,8 @@ class Client extends Model
                     $qq->orWhere('ssn_hash', hash('sha256', $search));
                 }
             });
-        });
+        }
+
         $query->when(filled($filters['legal_status_id'] ?? null), function (Builder $q) use ($filters) {
             $q->where('legal_status_id', (int) $filters['legal_status_id']);
         });
@@ -167,8 +184,16 @@ class Client extends Model
             FILTER_VALIDATE_BOOLEAN,
             FILTER_NULL_ON_FAILURE
         );
-        $query->when($hasHowpa, fn(Builder $q) => $q->whereHas('howpaContracts'));
-        $query->when($hasMeals, fn(Builder $q) => $q->whereHas('contractMeals'));
+        if ($hasHowpa === true && $hasMeals === true) {
+            $query->where(function (Builder $q) {
+                $q->whereHas('howpaContracts')
+                    ->whereHas('contractMeals');
+            });
+        } elseif ($hasHowpa === true) {
+            $query->whereHas('howpaContracts');
+        } elseif ($hasMeals === true) {
+            $query->whereHas('contractMeals');
+        }
         $fromAge = filter_var($filters['from_age'] ?? null, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
         $toAge   = filter_var($filters['to_age']   ?? null, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
 
@@ -316,11 +341,12 @@ class Client extends Model
     {
         $totalIncome = $this->total_income;
         $householdSize = $this->householdMembers->count() + 1;
-        return DB::table('income_limits')
+        $value = DB::table('income_limits')
             ->where('household_size', $householdSize)
             ->where('income_limit', '>=', $totalIncome)
             ->orderBy('percentage_category')
             ->value('percentage_category');
+        return $value ? Number::percentage($value, 0) : null;
     }
 
     public function getHouseholdTotalAttribute(): int
@@ -546,13 +572,13 @@ class Client extends Model
                 default => 0,
             } : 0;
     }
-    public function getIncomeMonthlyAttribute(): float
+    public function getIncomeMonthlyAttribute(): string
     {
-        return $this->income ? round($this->income / 12, 2) : 0;
+        return $this->convertToCurrencyFormat($this->income);
     }
-    public function getTotalIncomeMonthlyAttribute(): float
+    public function getTotalIncomeMonthlyAttribute(): string
     {
-        return $this->total_income ? round($this->total_income / 12, 2) : 0;
+        return $this->convertToCurrencyFormat($this->total_income);
     }
 
     public function howpaContracts(): HasMany
@@ -621,6 +647,7 @@ class Client extends Model
             ->where('id', $clientId)
             ->exists();
     }
+
     public function getIdentificationDataAttribute()
     {
         $this->loadMissing('identificationType');
@@ -634,5 +661,23 @@ class Client extends Model
     public function address(): BelongsTo
     {
         return $this->belongsTo(Address::class);
+    }
+    public function housingStatus(): BelongsTo
+    {
+        return $this->belongsTo(HousingStatus::class);
+    }
+    public function ethnicity(): BelongsTo
+    {
+        return $this->belongsTo(Ethnicity::class);
+    }
+    public function gender(): BelongsTo
+    {
+        return $this->belongsTo(Gender::class);
+    }
+
+    public function getAddressFormattedAttribute(): string|null
+    {
+        $address = $this->address;
+        return $address ? $address->address_formatted : "";
     }
 }

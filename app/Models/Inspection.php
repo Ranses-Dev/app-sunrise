@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\InspectionStatus;
+use App\Traits\ConvertToDateStandard;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 
 class Inspection extends Model
 {
+    use ConvertToDateStandard;
     protected $fillable = [
         'program_branch_id',
         'address_id',
@@ -46,6 +48,22 @@ class Inspection extends Model
     {
         return $this->belongsTo(ProgramBranch::class);
     }
+    public function tenantHowpa(): BelongsTo
+    {
+        return $this->belongsTo(Client::class, 'tenant_howpa_id');
+    }
+    public function landlordHowpa(): BelongsTo
+    {
+        return $this->belongsTo(Client::class, 'landlord_howpa_id');
+    }
+    public function tenantAddress(): BelongsTo
+    {
+        return $this->belongsTo(Address::class, 'tenant_address_id', 'id');
+    }
+    public function landlordAddress(): BelongsTo
+    {
+        return $this->belongsTo(Address::class, 'landlord_address_id', 'id');
+    }
 
     public function housingType(): BelongsTo
     {
@@ -64,6 +82,7 @@ class Inspection extends Model
 
     public function scopeSearch(Builder $query, array $filters): Builder
     {
+        $query->with(['programBranch', 'tenantHowpa', 'landlordHowpa', 'tenantAddress', 'landlordAddress', 'housingType', 'housingInspector', 'address']);
         if (!empty($filters['search'])) {
             $query->where('landlord_name', 'like', '%' . $filters['search'] . '%')
                 ->orWhere('landlord_contact_information', 'like', '%' . $filters['search'] . '%')
@@ -116,5 +135,13 @@ class Inspection extends Model
     public function address(): BelongsTo
     {
         return $this->belongsTo(Address::class, 'address_id', 'id');
+    }
+    public function getInspectionRequestedDateFormattedAttribute(): string|null
+    {
+        return $this->inspection_requested_date ? $this->convertToDateStandard($this->inspection_requested_date) : "";
+    }
+    public function getInspectionRequestedScheduledDateFormattedAttribute(): string
+    {
+        return $this->inspection_requested_scheduled_date ? $this->convertToDateStandard($this->inspection_requested_scheduled_date) : "";
     }
 }

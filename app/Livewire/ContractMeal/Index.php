@@ -28,6 +28,8 @@ class Index extends Component
         $this->form->loadProgramBranches();
         $this->form->getCityDistricts();
         $this->form->getCountyDistricts();
+        $this->form->getColumnsDefault();
+        $this->form->getColumnsOptions();
     }
 
     public function render()
@@ -79,8 +81,18 @@ class Index extends Component
     }
     public function updatedFormFiltersCountyDistrictId()
     {
-    
         $this->form->reset('filters.cityId');
         $this->form->getCities();
+    }
+
+    #[On('columns-updated')]
+    public function updateColumns(array $columnsSelected)
+    {
+        $this->form->columnsSelected = $columnsSelected;
+    }
+
+    public function exportExcel()
+    {
+        return $this->redirect(url: route('exports.excel.contract-meals', ["filters" => $this->form->filters, "columns" => $this->form->columnsSelected]));
     }
 }

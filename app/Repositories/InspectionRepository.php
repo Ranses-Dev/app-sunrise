@@ -21,7 +21,7 @@ class InspectionRepository implements InspectionRepositoryInterface
     }
 
      public function getFiltered(array $filters = []): Builder{
-           return Inspection::with(['address','programBranch','housingType','housingInspector'])->search($filters);
+           return Inspection::search($filters);
 
 }
     public function create(array $data): Inspection

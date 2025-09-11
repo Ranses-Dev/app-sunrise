@@ -34,4 +34,9 @@ class EmergencyContact extends Model
             ->orWhere('address', 'like', "%{$search}%")
             ->orWhere('phone_number', 'like', "%{$search}%");
     }
+
+    public function toString(): string
+    {
+        return "Name: {$this->name}, \n Address: {$this->address}, \n Phone: {$this->phone_number}";
+    }
 }

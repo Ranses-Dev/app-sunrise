@@ -26,6 +26,7 @@ use App\Repositories\HousingStatusRepositoryInterface as HousingStatusRepository
 use App\Repositories\AddressRepositoryInterface as AddressRepository;
 use App\Traits\ImageHandler;
 use App\Repositories\IncomeTypeRepositoryInterface as IncomeTypeRepository;
+use App\Enums\ClientColumns;
 
 class Client extends Form
 {
@@ -116,6 +117,8 @@ class Client extends Form
         'countyDistrictId' => null,
         'city_id' => null
     ];
+    public array $columnsSelected = [];
+    public array $columns = [];
 
     public function boot()
     {
@@ -458,5 +461,43 @@ class Client extends Form
     public function results(): LengthAwarePaginator
     {
         return $this->clientRepository->getFiltered($this->filters)->paginate(pageName: 'clients-page');
+    }
+
+    public function getColumnsDefault()
+    {
+        $this->columnsSelected = collect(ClientColumns::options())
+            ->filter(fn($column) => ($column['default'] ?? false) === true)
+            ->pluck('value')
+            ->all();
+    }
+    public function getColumnsOptions()
+    {
+        $this->columns = collect(ClientColumns::options())
+            ->map(fn($column) => [
+                'value' => $column['value'],
+                'label' => $column['label'],
+                'default' => $column['default'] ?? false,
+            ])
+            ->all();
+    }
+
+    public function resetFilters()
+    {
+        $this->filters = [
+            'search' => '',
+            'legal_status_id' => '',
+            'identification_type_id' => '',
+            'ethnicity_id' => '',
+            'healthcare_provider_id' => '',
+            'gender_id' => '',
+            'income_type_id' => '',
+            'has_howpa' => false,
+            'has_meals' => false,
+            'from_age' => null,
+            'to_age' => null,
+            'city_district_id' => null,
+            'countyDistrictId' => null,
+            'city_id' => null
+        ];
     }
 }

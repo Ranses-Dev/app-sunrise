@@ -29,6 +29,8 @@ class Index extends Component
         $this->form->getClientServiceSpecialists();
         $this->form->getCityDistricts();
         $this->form->getCountyDistricts();
+        $this->form->getColumnsDefault();
+        $this->form->getColumnsOptions();
     }
 
     public function create()
@@ -80,5 +82,15 @@ class Index extends Component
     {
         $this->form->reset('filters.cityId');
         $this->form->getCitiesFilter();
+    }
+    #[On('columns-updated')]
+    public function updateColumns(array $columnsSelected)
+    {
+        $this->form->columnsSelected = $columnsSelected;
+    }
+
+     public function exportExcel()
+    {
+        return $this->redirect(url: route('exports.excel.howpa-contracts', ["filters" => $this->form->filters, "columns" => $this->form->columnsSelected]));
     }
 }

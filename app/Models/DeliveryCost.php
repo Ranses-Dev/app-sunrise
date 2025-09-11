@@ -35,6 +35,6 @@ class DeliveryCost extends Model
     }
     public function getFormattedCurrencyAttribute(): string
     {
-        return $this->convert($this->cost);
+        return $this->convertToCurrencyFormat($this->cost);
     }
 }

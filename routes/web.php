@@ -142,6 +142,7 @@ Route::middleware(['throttle:60,1'])->group(function () {
         Route::get('inspections/{id}/show', \App\Livewire\Inspection\Show::class)->name('inspections.show');
     });
     Route::prefix('exports')->as('exports.')->group(function () {
+
         //Exports
         Route::prefix('clients')->as('clients.')->group(function () {
             Route::get('identifications-due', \App\Http\Controllers\Exports\IdentificationsDue::class)->name('identifications-due');
@@ -152,6 +153,14 @@ Route::middleware(['throttle:60,1'])->group(function () {
         Route::get('inspections', \App\Http\Controllers\Exports\InspectionExport::class)->name('inspections');
         Route::get('contract-meals', \App\Http\Controllers\Exports\ContractMealExport::class)->name('contract-meals');
         Route::get('howpa-contracts', \App\Http\Controllers\Exports\HowpaContractExport::class)->name('howpa-contracts');
+
+        Route::prefix('excel')->as('excel.')->group(function () {
+            Route::get('inspections', \App\Http\Controllers\Exports\InspectionToExcel::class)->name('inspections');
+            Route::get('addresses', \App\Http\Controllers\Exports\AddressExcelExportController::class)->name('addresses');
+            Route::get('contract-meals', \App\Http\Controllers\Exports\MealContractExcelExportController::class)->name('contract-meals');
+            Route::get('howpa-contracts', \App\Http\Controllers\Exports\HowpaContractExcelExportController::class)->name('howpa-contracts');
+            Route::get('clients', \App\Http\Controllers\Exports\ClientExcelExportController::class)->name('clients');
+        });
     });
 });
 

@@ -4,7 +4,6 @@ namespace App\Livewire\Forms;
 
 use App\Enums\RecentLivingSituation;
 use Illuminate\Validation\Rule;
-use Livewire\Attributes\Validate;
 use Livewire\Form;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Computed;
@@ -21,6 +20,7 @@ use App\Models\EmergencyContact;
 use App\Repositories\CityDistrictRepositoryInterface as CityDistrictRepository;
 use App\Repositories\CountyDistrictRepositoryInterface as CountyDistrictRepository;
 use App\Repositories\CityRepositoryInterface as CityRepository;
+use App\Enums\HowpaContractColumns;
 
 
 class HowpaContract extends Form
@@ -79,6 +79,8 @@ class HowpaContract extends Form
         'cityDistrictId' => null,
         'cityId' => null
     ];
+    public array $columnsSelected = [];
+    public array $columns = [];
     public ?Collection $emergencyContacts = null;
     public ?int $emergencyContactId = null;
     public ?Collection $programBranches = null;
@@ -422,6 +424,8 @@ class HowpaContract extends Form
     public function getClientById(int $id)
     {
         $this->client = $this->clientRepository->findById($id);
+        $this->howpaSsn = $this->client?->howpa_ssn;
+        $this->howpaClientNumber = $this->client?->howpa_client_number;
     }
     public function getProgramBranches()
     {
@@ -447,5 +451,22 @@ class HowpaContract extends Form
     public function getCitiesFilter()
     {
         $this->citiesFilter = $this->cityRepository->getCityByDistrictId($this->filters['countyDistrictId'] ?? null);
+    }
+    public function getColumnsDefault()
+    {
+        $this->columnsSelected = collect(HowpaContractColumns::options())
+            ->filter(fn($column) => ($column['default'] ?? false) === true)
+            ->pluck('value')
+            ->all();
+    }
+    public function getColumnsOptions()
+    {
+        $this->columns = collect(HowpaContractColumns::options())
+            ->map(fn($column) => [
+                'value' => $column['value'],
+                'label' => $column['label'],
+                'default' => $column['default'] ?? false,
+            ])
+            ->all();
     }
 }

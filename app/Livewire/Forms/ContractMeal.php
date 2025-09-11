@@ -21,6 +21,7 @@ use Livewire\Attributes\Computed;
 use App\Repositories\CityDistrictRepositoryInterface as CityDistrictRepository;
 use App\Repositories\CountyDistrictRepositoryInterface as CountyDistrictRepository;
 use App\Repositories\CityRepositoryInterface as CityRepository;
+use App\Enums\MealContractColumns;
 
 class ContractMeal extends Form
 {
@@ -38,13 +39,15 @@ class ContractMeal extends Form
     public ?string $code = null;
 
     public $filters = [
-        'search'=>null,
-        'clientServiceSpecialistId'=>null,
-        'programBranchId'=>null,
-        'countyDistrictId'=>null,
-        'cityDistrictId'=>null,
-        'cityId'=>null
+        'search' => null,
+        'clientServiceSpecialistId' => null,
+        'programBranchId' => null,
+        'countyDistrictId' => null,
+        'cityDistrictId' => null,
+        'cityId' => null
     ];
+    public array $columnsSelected = [];
+    public array $columns = [];
     public $cityDistricts = null;
     public $countyDistricts = null;
     public $cities = null;
@@ -254,5 +257,22 @@ class ContractMeal extends Form
     public function getCities()
     {
         $this->cities = $this->cityRepository->getCityByDistrictId($this->filters['countyDistrictId'] ?? null);
+    }
+    public function getColumnsDefault()
+    {
+        $this->columnsSelected = collect(MealContractColumns::options())
+            ->filter(fn($column) => ($column['default'] ?? false) === true)
+            ->pluck('value')
+            ->all();
+    }
+    public function getColumnsOptions()
+    {
+        $this->columns = collect(MealContractColumns::options())
+            ->map(fn($column) => [
+                'value' => $column['value'],
+                'label' => $column['label'],
+                'default' => $column['default'] ?? false,
+            ])
+            ->all();
     }
 }

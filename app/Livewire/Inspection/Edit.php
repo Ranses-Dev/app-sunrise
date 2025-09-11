@@ -5,6 +5,7 @@ namespace App\Livewire\Inspection;
 use Livewire\Component;
 use Livewire\Attributes\Title;
 use App\Livewire\Forms\Inspection as InspectionForm;
+use Illuminate\Support\Facades\Log;
 
 #[Title('Edit Inspection')]
 class Edit extends Component
@@ -43,6 +44,7 @@ class Edit extends Component
 
     public function selectedLandlord(int $id)
     {
+        Log::info('Selected Landlord ID: ' . $id);
         $this->form->landlordHowpaId = $id;
         $this->form->getLandlordById();
     }

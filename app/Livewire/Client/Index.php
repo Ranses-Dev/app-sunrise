@@ -33,7 +33,8 @@ class Index extends Component
         $this->form->getIncomeTypes();
         $this->form->getCityDistricts();
         $this->form->getCountyDistricts();
-
+        $this->form->getColumnsDefault();
+        $this->form->getColumnsOptions();
     }
     public function render()
     {
@@ -72,7 +73,7 @@ class Index extends Component
 
     public function exportClientListPdf()
     {
-        return $this->redirect(url: route('statistics.clients.pdfs.list', ["filters" => $this->form->filters]), navigate: false);
+        return $this->redirect(url: route('statistics.clients.pdfs.list', ["filters" => $this->form->filters,"columns" => $this->form->columnsSelected]), navigate: false);
     }
 
     public function show(int $id)
@@ -84,5 +85,29 @@ class Index extends Component
 
         $this->form->reset('filters.city_id');
         $this->form->getCitiesFiltered();
+    }
+    #[On('columns-updated')]
+    public function updateColumns(array $columnsSelected)
+    {
+        $this->form->columnsSelected = $columnsSelected;
+    }
+
+    #[On('reset-filters')]
+    public function resetFilters()
+    {
+        $this->form->resetFilters();
+        $this->form->getLegalStatuses();
+        $this->form->getIdentificationTypes();
+        $this->form->getEthnicities();
+        $this->form->getHealthcareProviders();
+        $this->form->getGenders();
+        $this->form->getIncomeTypes();
+        $this->form->getCityDistricts();
+        $this->form->getCountyDistricts();
+    }
+
+    public function exportExcel()
+    {
+        return $this->redirect(url: route('exports.excel.clients', ["filters" => $this->form->filters, "columns" => $this->form->columnsSelected]));
     }
 }

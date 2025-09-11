@@ -7,6 +7,7 @@
                 <flux:button.group>
                     <livewire:components.buttons.create-button @create="create" />
                     <livewire:components.buttons.export-button @export="exportClientListPdf" />
+                     <livewire:components.buttons.export-excel-button @export="exportExcel" />
                 </flux:button.group>
             @endcan
         </div>
@@ -111,49 +112,179 @@
             <flux:legend>Programs</flux:legend>
             <div class="flex flex-row items-center gap-4">
                 <div>
-                    <flux:switch wire:model.live="form.filters.hasHowpa" label="HOWPA" align="left" />
+                    <flux:switch wire:model.live="form.filters.has_howpa" label="HOWPA" align="left" />
                 </div>
                 <div>
-                    <flux:switch wire:model.live="form.filters.hasMeals" label="MEALS" align="left" />
+                    <flux:switch wire:model.live="form.filters.has_meals" label="MEALS" align="left" />
                 </div>
             </div>
         </flux:fieldset>
     </x-common.card-filter>
     <x-common.container-table>
+        <div class="flex justify-end mb-2">
+            <livewire:components.modal-columns :columns="$this->form->columns"
+                :columns-selected="$this->form->columnsSelected" />
+        </div>
         <flux:table :paginate="$this->form->results()">
             <flux:table.columns>
-                <flux:table.column>Full Name</flux:table.column>
-                <flux:table.column>Client Number</flux:table.column>
-                <flux:table.column>Legal Status</flux:table.column>
-                <flux:table.column>DOB</flux:table.column>
-                <flux:table.column>Age</flux:table.column>
-                <flux:table.column>Monthly Income</flux:table.column>
-                <flux:table.column>Annual Income</flux:table.column>
-                <flux:table.column>Gross Monthly Income</flux:table.column>
-                <flux:table.column>Gross Annual Income</flux:table.column>
-                <flux:table.column>Households</flux:table.column>
-                <flux:table.column>Income Type</flux:table.column>
-                <flux:table.column>Income Category (%)</flux:table.column>
+                @if (in_array('full_name', $this->form->columnsSelected))
+                    <flux:table.column>Full Name</flux:table.column>
+                @endif
+                @if (in_array('dob', $this->form->columnsSelected))
+                    <flux:table.column>DOB</flux:table.column>
+                @endif
+                @if (in_array('age', $this->form->columnsSelected))
+                    <flux:table.column>Age</flux:table.column>
+                @endif
+                @if (in_array('ssn', $this->form->columnsSelected))
+                    <flux:table.column>SSN</flux:table.column>
+                @endif
+                @if (in_array('client_number', $this->form->columnsSelected))
+                    <flux:table.column>Client #</flux:table.column>
+                @endif
+                @if (in_array('howpa_client_number', $this->form->columnsSelected))
+                    <flux:table.column>HOPWA Client #</flux:table.column>
+                @endif
+                @if (in_array('meal_client_number', $this->form->columnsSelected))
+                    <flux:table.column>MEALS Client #</flux:table.column>
+                @endif
+                @if (in_array('effective_date', $this->form->columnsSelected))
+                    <flux:table.column>Effective Date</flux:table.column>
+                @endif
+                @if (in_array('legal_status', $this->form->columnsSelected))
+                    <flux:table.column>Legal Status</flux:table.column>
+                @endif
+                @if (in_array('identification_type', $this->form->columnsSelected))
+                    <flux:table.column>Identification Type</flux:table.column>
+                @endif
+                @if (in_array('identification_number', $this->form->columnsSelected))
+                    <flux:table.column>Identification Number</flux:table.column>
+                @endif
+                @if (in_array('identification_expiration_date', $this->form->columnsSelected))
+                    <flux:table.column>Identification Expiration Date</flux:table.column>
+                @endif
+                @if (in_array('address_formatted', $this->form->columnsSelected))
+                    <flux:table.column>Address</flux:table.column>
+                @endif
+                @if (in_array('city_district', $this->form->columnsSelected))
+                    <flux:table.column>City District</flux:table.column>
+                @endif
+                @if (in_array('county_district', $this->form->columnsSelected))
+                    <flux:table.column>County District</flux:table.column>
+                @endif
+                @if (in_array('city', $this->form->columnsSelected))
+                    <flux:table.column>City</flux:table.column>
+                @endif
+                @if (in_array('email', $this->form->columnsSelected))
+                    <flux:table.column>Email</flux:table.column>
+                @endif
+                @if (in_array('income', $this->form->columnsSelected))
+                    <flux:table.column>Income</flux:table.column>
+                @endif
+                @if (in_array('gender', $this->form->columnsSelected))
+                    <flux:table.column>Gender</flux:table.column>
+                @endif
+                @if (in_array('is_deceased', $this->form->columnsSelected))
+                    <flux:table.column>Is Deceased</flux:table.column>
+                @endif
+                @if (in_array('ethnicity', $this->form->columnsSelected))
+                    <flux:table.column>Ethnicity</flux:table.column>
+                @endif
+                @if (in_array('healthcare_provider', $this->form->columnsSelected))
+                    <flux:table.column>Healthcare Provider</flux:table.column>
+                @endif
+                @if (in_array('healthcare_provider_plan', $this->form->columnsSelected))
+                    <flux:table.column>Healthcare Provider Plan</flux:table.column>
+                @endif
+                @if (in_array('housing_status', $this->form->columnsSelected))
+                    <flux:table.column>Housing Status</flux:table.column>
+                @endif
+                @if (in_array('income_category', $this->form->columnsSelected))
+                    <flux:table.column>Income Category</flux:table.column>
+                @endif
             </flux:table.columns>
             <flux:table.rows>
                 @foreach ($this->form->results() as $result)
                     <flux:table.row :key="$result->id">
-                        <flux:table.cell>{{ $result->full_name }}</flux:table.cell>
-                        <flux:table.cell>{{ $result->client_number }}</flux:table.cell>
-                        <flux:table.cell>{{ $result->legalStatus?->name }}</flux:table.cell>
-                        <flux:table.cell>{{ $result->dob->format('m/d/Y') }}</flux:table.cell>
-                        <flux:table.cell>{{ $result->age }}</flux:table.cell>
-                        <flux:table.cell>{{ $result->income_monthly }}
-                        </flux:table.cell>
-                        <flux:table.cell>{{ $result->income }}</flux:table.cell>
-                        <flux:table.cell>{{ $result->total_income_monthly }}</flux:table.cell>
-                        <flux:table.cell>{{ $result->total_income }}</flux:table.cell>
-                        <flux:table.cell>{{ $result->household_total }}</flux:table.cell>
-                        <flux:table.cell>{{ $result->incomeType?->name }}</flux:table.cell>
-                        <flux:table.cell> @if ($result->income_category)
-                            <flux:badge color="green">{{"$result->income_category %" }}</flux:badge>
-                        @else
-                                <flux:badge color="red">N/A</flux:badge>
+                        @if (in_array('full_name', $this->form->columnsSelected))
+                            <flux:table.cell>{{ $result->full_name }}</flux:table.cell>
+                        @endif
+                        @if (in_array('dob', $this->form->columnsSelected))
+                            <flux:table.cell>{{ $result->dob_formatted }}</flux:table.cell>
+                        @endif
+                        @if (in_array('age', $this->form->columnsSelected))
+                            <flux:table.cell>{{ $result->age }}</flux:table.cell>
+                        @endif
+                        @if (in_array('ssn', $this->form->columnsSelected))
+                            <flux:table.cell>{{ $result->howpa_ssn }}</flux:table.cell>
+                        @endif
+                        @if (in_array('client_number', $this->form->columnsSelected))
+                            <flux:table.cell>{{ $result->client_number }}</flux:table.cell>
+                        @endif
+                        @if (in_array('howpa_client_number', $this->form->columnsSelected))
+                            <flux:table.cell>{{ $result->howpa_client_number }}</flux:table.cell>
+                        @endif
+                        @if (in_array('meal_client_number', $this->form->columnsSelected))
+                            <flux:table.cell>{{ $result->meal_client_number }}</flux:table.cell>
+                        @endif
+                        @if (in_array('effective_date', $this->form->columnsSelected))
+                            <flux:table.cell>{{ $result->effective_date_formatted }}</flux:table.cell>
+                        @endif
+                        @if (in_array('legal_status', $this->form->columnsSelected))
+                            <flux:table.cell>{{ $result->legalStatus?->name }}</flux:table.cell>
+                        @endif
+                        @if (in_array('identification_type', $this->form->columnsSelected))
+                            <flux:table.cell>{{ $result->identificationType?->name }}</flux:table.cell>
+                        @endif
+                        @if (in_array('identification_number', $this->form->columnsSelected))
+                            <flux:table.cell>{{ $result->identification_number }}</flux:table.cell>
+                        @endif
+                        @if (in_array('identification_expiration_date', $this->form->columnsSelected))
+                            <flux:table.cell>{{ $result->identification_expiration_date_formatted }}</flux:table.cell>
+                        @endif
+                        @if (in_array('address_formatted', $this->form->columnsSelected))
+                            <flux:table.cell>{{ $result->address_formatted }}</flux:table.cell>
+                        @endif
+                        @if (in_array('city_district', $this->form->columnsSelected))
+                            <flux:table.cell>{{ $result->cityDistrict?->name }}</flux:table.cell>
+                        @endif
+                        @if (in_array('county_district', $this->form->columnsSelected))
+                            <flux:table.cell>{{ $result->countyDistrict?->name }}</flux:table.cell>
+                        @endif
+                        @if (in_array('city', $this->form->columnsSelected))
+                            <flux:table.cell>{{ $result->city?->name }}</flux:table.cell>
+                        @endif
+                        @if (in_array('email', $this->form->columnsSelected))
+                            <flux:table.cell>{{ $result->email }}</flux:table.cell>
+                        @endif
+                        @if (in_array('income', $this->form->columnsSelected))
+                            <flux:table.cell>{{ $result->income_formatted }}</flux:table.cell>
+                        @endif
+                        @if (in_array('gender', $this->form->columnsSelected))
+                            <flux:table.cell>{{ $result->gender?->name }}</flux:table.cell>
+                        @endif
+                        @if (in_array('is_deceased', $this->form->columnsSelected))
+                            <flux:table.cell>{{ $result->is_deceased ? 'Yes' : 'No' }}</flux:table.cell>
+                        @endif
+                        @if (in_array('ethnicity', $this->form->columnsSelected))
+                            <flux:table.cell>{{ $result->ethnicity?->name }}</flux:table.cell>
+                        @endif
+                        @if (in_array('healthcare_provider', $this->form->columnsSelected))
+                            <flux:table.cell>{{ $result->healthcareProvider?->name }}</flux:table.cell>
+                        @endif
+                        @if (in_array('healthcare_provider_plan', $this->form->columnsSelected))
+                            <flux:table.cell>{{ $result->healthcareProviderPlan?->name }}</flux:table.cell>
+                        @endif
+                        @if (in_array('housing_status', $this->form->columnsSelected))
+                            <flux:table.cell>{{ $result->housingStatus?->name }}</flux:table.cell>
+                        @endif
+                        <flux:table.cell>
+                            @if (in_array('income_category', $this->form->columnsSelected))
+                                @if ($result->income_category)
+                                    <flux:badge color="green">{{"$result->income_category" }}</flux:badge>
+                                @else
+                                    <flux:badge color="red">N/A</flux:badge>
+                                @endif
                             @endif
                         </flux:table.cell>
                         <flux:table.cell>
