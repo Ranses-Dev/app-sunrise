@@ -217,6 +217,22 @@ class Client extends Model
         if (filled($filters['city_id'] ?? null)) {
             $query->where('city_id', (int) $filters['city_id']);
         }
+        $hispanic = filter_var(
+            $filters['hispanic'] ?? null,
+            FILTER_VALIDATE_BOOLEAN,
+            FILTER_NULL_ON_FAILURE
+        );
+        if ($hispanic !== null) {
+            $query->where('hispanic', $hispanic);
+        }
+        $deceased = filter_var(
+            $filters['isDeceased'] ?? null,
+            FILTER_VALIDATE_BOOLEAN,
+            FILTER_NULL_ON_FAILURE
+        );
+        if ($deceased !== null) {
+            $query->where('is_deceased', $deceased);
+        }
         return $query;
     }
     public function scopeSsn(Builder $query, string|null $ssn): Builder

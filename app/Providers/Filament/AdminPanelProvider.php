@@ -64,10 +64,10 @@ class AdminPanelProvider extends PanelProvider
             )*/
             ->brandLogo(asset('logo.png'))
             ->plugins([
-                /*TwoFactorAuthenticationPlugin::make()
+                TwoFactorAuthenticationPlugin::make()
                     ->enableTwoFactorAuthentication(
-                       // condition: true,
-                       // challengeMiddleware: TwoFactorChallenge::class,
+                         condition: true,
+                         challengeMiddleware: TwoFactorChallenge::class,
                     ) // Enable Google 2FA
                     ->forceTwoFactorSetup(
                         condition: true, // Force 2FA setup for all users
@@ -77,7 +77,8 @@ class AdminPanelProvider extends PanelProvider
                         condition: true, // Show 2FA on the user menu item
                         label: '2FA', // Menu item label
                         icon: 'heroicon-s-key', // Menu item icon
-                    )*/])
+                    )
+            ])
             ->profile();
     }
 }

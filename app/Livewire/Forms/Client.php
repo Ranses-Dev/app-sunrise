@@ -115,7 +115,10 @@ class Client extends Form
         'to_age' => null,
         'city_district_id' => null,
         'countyDistrictId' => null,
-        'city_id' => null
+        'city_id' => null,
+        'hispanic' => null,
+        'isDeceased' => null
+
     ];
     public array $columnsSelected = [];
     public array $columns = [];
@@ -497,7 +500,9 @@ class Client extends Form
             'to_age' => null,
             'city_district_id' => null,
             'countyDistrictId' => null,
-            'city_id' => null
+            'city_id' => null,
+            'hispanic' => null,
+            'isDeceased' => null
         ];
     }
 }

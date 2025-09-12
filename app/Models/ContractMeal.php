@@ -23,11 +23,13 @@ class ContractMeal extends Model
         'is_active',
         'recertification_date',
         'notes',
-        'code'
+        'code',
+        'delivery_days',
     ];
     protected $casts = [
         'is_active' => 'boolean',
         'recertification_date' => 'date',
+        
     ];
     public function scopeSearch(Builder $query, array $filters): Builder
     {
@@ -49,6 +51,7 @@ class ContractMeal extends Model
             'foodCost',
             'programDeliveryCost',
             'terminationReason',
+
         ]);
         if (filled($filters['search'] ?? null)) {
             $search = $filters['search'];

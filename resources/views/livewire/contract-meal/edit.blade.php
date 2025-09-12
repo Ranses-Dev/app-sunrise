@@ -97,6 +97,16 @@
                 <flux:error name="form.foodCostId" />
             </div>
             <div class="col-span-1">
+                <flux:label>Delivery Days</flux:label>
+                <flux:select wire:model="form.selectedDays" multiple variant="listbox" placeholder="Choose delivery days..."
+                    clearable>
+                    @foreach ($form->deliveryDays as $day)
+                        <flux:select.option value="{{$day['value']}}">{{$day['name']}}</flux:select.option>
+                    @endforeach
+                </flux:select>
+                <flux:error name="form.selectedDays" />
+            </div>
+            <div class="col-span-1">
                 <flux:label>Termination Reason</flux:label>
                 <flux:select class="col-span-2" wire:model="form.terminationReasonId" variant="combobox"
                     placeholder="Choose termination reason..." clearable>
@@ -112,8 +122,6 @@
                 <flux:textarea wire:model="form.notes" placeholder="Enter notes..." />
                 <flux:error name="form.notes" />
             </div>
-
-
             <div class="flex justify-end mt-6">
                 <flux:button.group class="buttons">
                     <flux:button wire:click="cancel" type="button" icon="x-mark">Cancel</flux:button>

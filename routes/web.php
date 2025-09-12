@@ -19,7 +19,7 @@ Route::middleware(['throttle:60,1'])->group(function () {
     Route::get('/', function () {
         return redirect()->route('dashboard');
     })->name('home');
-    Route::middleware(['auth',/* 'verified',  'has-two-factor-activated', 'two-factor'*/])->group(function () {
+    Route::middleware(['auth', 'verified',  'has-two-factor-activated', 'two-factor'])->group(function () {
         Route::prefix('settings')->as('settings.')->group(function () {
             Route::get('profile', Profile::class)->name('profile');
             Route::get('password', Password::class)->name('password');

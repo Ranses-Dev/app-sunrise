@@ -7,7 +7,7 @@
                 <flux:button.group>
                     <livewire:components.buttons.create-button @create="create" />
                     <livewire:components.buttons.export-button @export="exportClientListPdf" />
-                     <livewire:components.buttons.export-excel-button @export="exportExcel" />
+                    <livewire:components.buttons.export-excel-button @export="exportExcel" />
                 </flux:button.group>
             @endcan
         </div>
@@ -116,6 +116,17 @@
                 </div>
                 <div>
                     <flux:switch wire:model.live="form.filters.has_meals" label="MEALS" align="left" />
+                </div>
+            </div>
+        </flux:fieldset>
+        <flux:fieldset>
+            <flux:legend>Additional Info</flux:legend>
+            <div class="flex flex-row items-center gap-4">
+                <div>
+                    <flux:switch wire:model.live="form.filters.hispanic" label="HISPANIC" align="left" />
+                </div>
+                <div>
+                    <flux:switch wire:model.live="form.filters.isDeceased" label="DECEASED" align="left" />
                 </div>
             </div>
         </flux:fieldset>

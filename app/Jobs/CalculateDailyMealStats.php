@@ -27,11 +27,13 @@ class CalculateDailyMealStats implements ShouldQueue
     public function handle(): void
     {
         $today = Carbon::today();
+        $weekDay = $today->copy()->isoWeekday();
         $dayTotals = ContractMeal::query()
             ->join('delivery_costs', 'contract_meals.delivery_cost_id', '=', 'delivery_costs.id')
             ->join('food_costs', 'contract_meals.food_cost_id', '=', 'food_costs.id')
             ->join('program_delivery_costs', 'contract_meals.program_delivery_cost_id', '=', 'program_delivery_costs.id')
             ->where('contract_meals.is_active', true)
+            ->whereJsonContains('contract_meals.delivery_days', $weekDay)
             ->selectRaw('SUM(delivery_costs.cost) as delivery_cost,SUM(food_costs.cost) as food_cost,SUM(program_delivery_costs.cost) as program_delivery_cost')
             ->first()?->toArray();
         MealContractStatistics::updateOrCreate(

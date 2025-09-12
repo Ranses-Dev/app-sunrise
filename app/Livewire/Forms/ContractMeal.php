@@ -22,6 +22,7 @@ use App\Repositories\CityDistrictRepositoryInterface as CityDistrictRepository;
 use App\Repositories\CountyDistrictRepositoryInterface as CountyDistrictRepository;
 use App\Repositories\CityRepositoryInterface as CityRepository;
 use App\Enums\MealContractColumns;
+use App\Enums\WeekDay;
 
 class ContractMeal extends Form
 {
@@ -38,6 +39,8 @@ class ContractMeal extends Form
     public ?string $recertificationDate = null;
     public ?string $notes = null;
     public ?string $code = null;
+    public ?array $deliveryDays = null;
+    public ?array $selectedDays = null;
 
     public $filters = [
         'search' => null,
@@ -125,6 +128,8 @@ class ContractMeal extends Form
             'recertificationDate' => ['required', 'date'],
             'notes' => ['nullable', 'string'],
             'code' => ['nullable', 'string', 'max:15', Rule::unique('contract_meals')->ignore($this->id)],
+            'selectedDays' => ['required', 'array'],
+            'selectedDays.*' => ['integer', 'between:1,7'],
         ];
     }
     public function messages(): array
@@ -165,6 +170,8 @@ class ContractMeal extends Form
                 $this->recertificationDate = optional($result->recertification_date)->format('Y-m-d');
                 $this->notes = $result->notes;
                 $this->code = $result->code;
+                $this->getDeliveryDays();
+                $this->selectedDays =  explode(',', $result->delivery_days);
             }
         }
     }
@@ -183,6 +190,7 @@ class ContractMeal extends Form
             'recertification_date' => $this->recertificationDate ? date('Y-m-d', strtotime($this->recertificationDate)) : null,
             'notes' => $this->notes,
             'code' => $this->code,
+            'delivery_days' => implode(',', $this->selectedDays),
         ];
         if ($this->id) {
             $this->contractMealRepository->update($this->id, $data);
@@ -278,5 +286,14 @@ class ContractMeal extends Form
                 'default' => $column['default'] ?? false,
             ])
             ->all();
+    }
+    public function getDeliveryDays()
+    {
+        $this->deliveryDays = collect(WeekDay::cases())
+            ->map(fn($day) => [
+                'value' => $day->value,
+                'name'  => $day->label(),
+            ])
+            ->toArray();
     }
 }
