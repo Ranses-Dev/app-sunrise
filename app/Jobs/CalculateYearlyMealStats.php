@@ -27,8 +27,10 @@ class CalculateYearlyMealStats implements ShouldQueue
         $today = Carbon::today();
         $startOfYear = $today->copy()->startOfYear();
         $endOfYear = $today->copy()->endOfYear();
+        $weekDay = (string)$today->copy()->isoWeekday();
         $yearlyTotals = MealContractStatistics::query()
             ->whereBetween('date', [$startOfYear, $endOfYear])
+            ->whereJsonContains("delivery_days", $weekDay)
             ->selectRaw('SUM(delivery_cost) as yearly_delivery_cost,SUM(food_cost) as yearly_food_cost,SUM(program_delivery_cost) as yearly_program_delivery_cost')
             ->first()?->toArray();
         MealContractStatistics::updateOrCreate(

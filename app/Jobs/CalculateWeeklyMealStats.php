@@ -28,14 +28,14 @@ class CalculateWeeklyMealStats implements ShouldQueue
         $today = Carbon::today();
         $startOfWeek = $today->copy()->startOfWeek();
         $endOfWeek = $today->copy()->endOfWeek();
-
+        $weekDay = (string)$today->copy()->isoWeekday();
         $weeklyTotals = MealContractStatistics::query()
             ->whereBetween('date', [$startOfWeek, $endOfWeek])
             ->selectRaw('
         SUM(delivery_cost) as weekly_delivery_cost,
         SUM(food_cost) as weekly_food_cost,
         SUM(program_delivery_cost) as weekly_program_delivery_cost
-    ')
+    ')->whereJsonContains("delivery_days", $weekDay)
             ->first()?->toArray();
 
         MealContractStatistics::updateOrCreate(

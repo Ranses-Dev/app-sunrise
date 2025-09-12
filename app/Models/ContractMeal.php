@@ -29,7 +29,7 @@ class ContractMeal extends Model
     protected $casts = [
         'is_active' => 'boolean',
         'recertification_date' => 'date',
-        
+        'delivery_days' => 'array',
     ];
     public function scopeSearch(Builder $query, array $filters): Builder
     {

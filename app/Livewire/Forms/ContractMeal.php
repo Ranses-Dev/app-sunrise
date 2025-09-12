@@ -171,7 +171,7 @@ class ContractMeal extends Form
                 $this->notes = $result->notes;
                 $this->code = $result->code;
                 $this->getDeliveryDays();
-                $this->selectedDays =  explode(',', $result->delivery_days);
+                $this->selectedDays =   $result->delivery_days;
             }
         }
     }
@@ -190,7 +190,7 @@ class ContractMeal extends Form
             'recertification_date' => $this->recertificationDate ? date('Y-m-d', strtotime($this->recertificationDate)) : null,
             'notes' => $this->notes,
             'code' => $this->code,
-            'delivery_days' => implode(',', $this->selectedDays),
+            'delivery_days' => $this->selectedDays,
         ];
         if ($this->id) {
             $this->contractMealRepository->update($this->id, $data);
