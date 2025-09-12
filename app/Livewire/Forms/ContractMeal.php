@@ -27,6 +27,7 @@ class ContractMeal extends Form
 {
     public ?int $id = null;
     public ?int $clientId = null;
+    public ?string $mealClientNumber = null;
     public ?int $programBranchId = null;
     public ?int $deliveryCostId = null;
     public ?int $foodCostId = null;
@@ -95,6 +96,7 @@ class ContractMeal extends Form
                     $fail('The client already has an active meal contract.');
                 }
             },],
+            'mealClientNumber' => ['nullable', 'string', 'max:15', Rule::unique('clients', 'meal_client_number')->ignore($this->clientId)],
             'clientServiceSpecialistId' => ['required',  function ($attribute, $value, $fail) {
                 if ($this->programBranchId) {
                     $exists = $this->clientRepository->getClientServiceSpecialistsByProgramBranch($this->programBranchId)
@@ -151,6 +153,7 @@ class ContractMeal extends Form
             if ($result) {
                 $this->id = $result->id;
                 $this->clientId = $result->client_id;
+                $this->mealClientNumber = $this->getClientById($this->clientId)?->meal_client_number;
                 $this->programBranchId = $result->program_branch_id;
                 $this->loadClientServiceSpecialists();
                 $this->clientServiceSpecialistId = $result->client_service_specialist_id;
@@ -186,6 +189,7 @@ class ContractMeal extends Form
         } else {
             $this->contractMealRepository->create($data);
         }
+        $this->clientRepository->update($this->clientId, ['meal_client_number' => $this->mealClientNumber]);
         $this->reset(['id', 'clientId', 'mealContractTypeId', 'deliveryCostId', 'foodCostsId', 'programDeliveryCostId', 'terminationReasonId', 'isActive', 'recertificationDate', 'notes']);
     }
     public function delete()

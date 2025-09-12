@@ -5,7 +5,7 @@
             <flux:button.group>
                 <livewire:components.buttons.create-button @create="create" />
                 <livewire:components.buttons.export-button @export="export" />
-                 <livewire:components.buttons.export-excel-button @export="exportExcel" />
+                <livewire:components.buttons.export-excel-button @export="exportExcel" />
             </flux:button.group>
         @endcan
     </div>
@@ -179,7 +179,7 @@
                             <flux:table.cell>{{ $result->client?->effective_date_formatted }}</flux:table.cell>
                         @endif
                         @if (in_array('client_meal_number', $this->form->columnsSelected))
-                            <flux:table.cell>{{ $result->client?->meal_number }}</flux:table.cell>
+                            <flux:table.cell>{{ $result->client?->meal_client_number }}</flux:table.cell>
                         @endif
                         @if (in_array('client_legal_status', $this->form->columnsSelected))
                             <flux:table.cell>{{ $result->client?->legalStatus?->name }}</flux:table.cell>
@@ -285,7 +285,113 @@
                             </flux:dropdown>
                         </flux:table.cell>
                     </flux:table.row>
+
                 @endforeach
+                @if (in_array('delivery_cost', $this->form->columnsSelected) || in_array('food_cost', $this->form->columnsSelected) || in_array('program_delivery_cost', $this->form->columnsSelected))
+                    <flux:table.row>
+                        <flux:table.cell><strong>Totals:</strong></flux:table.cell>
+                        @if (in_array('client_address_formatted', $this->form->columnsSelected))
+                            <flux:table.cell></flux:table.cell>
+                        @endif
+                        @if (in_array('client_dob', $this->form->columnsSelected))
+                            <flux:table.cell></flux:table.cell>
+                        @endif
+                        @if (in_array('client_ssn', $this->form->columnsSelected))
+                            <flux:table.cell></flux:table.cell>
+                        @endif
+                        @if (in_array('client_effective_date', $this->form->columnsSelected))
+                            <flux:table.cell></flux:table.cell>
+                        @endif
+                        @if (in_array('client_meal_number', $this->form->columnsSelected))
+                            <flux:table.cell></flux:table.cell>
+                        @endif
+                        @if (in_array('client_legal_status', $this->form->columnsSelected))
+                            <flux:table.cell></flux:table.cell>
+                        @endif
+                        @if (in_array('client_identification_type', $this->form->columnsSelected))
+                            <flux:table.cell></flux:table.cell>
+                        @endif
+                        @if (in_array('client_identification_number', $this->form->columnsSelected))
+                            <flux:table.cell></flux:table.cell>
+                        @endif
+                        @if (in_array('client_identification_expiration_date', $this->form->columnsSelected))
+                            <flux:table.cell></flux:table.cell>
+                        @endif
+                        @if (in_array('client_city_district', $this->form->columnsSelected))
+                            <flux:table.cell></flux:table.cell>
+                        @endif
+                        @if (in_array('client_county_district', $this->form->columnsSelected))
+                            <flux:table.cell></flux:table.cell>
+                        @endif
+                        @if (in_array('client_city', $this->form->columnsSelected))
+                            <flux:table.cell></flux:table.cell>
+                        @endif
+                        @if (in_array('client_email', $this->form->columnsSelected))
+                            <flux:table.cell></flux:table.cell>
+                        @endif
+                        @if (in_array('client_income_type', $this->form->columnsSelected))
+                            <flux:table.cell></flux:table.cell>
+                        @endif
+                        @if (in_array('client_income', $this->form->columnsSelected))
+                            <flux:table.cell></flux:table.cell>
+                        @endif
+
+                        @if (in_array('client_gender', $this->form->columnsSelected))
+                            <flux:table.cell></flux:table.cell>
+                        @endif
+                        @if (in_array('client_is_deceased', $this->form->columnsSelected))
+                            <flux:table.cell></flux:table.cell>
+                        @endif
+                        @if (in_array('client_ethnicity', $this->form->columnsSelected))
+                            <flux:table.cell></flux:table.cell>
+                        @endif
+                        @if (in_array('client_healthcare_provider', $this->form->columnsSelected))
+                            <flux:table.cell></flux:table.cell>
+                        @endif
+                        @if (in_array('client_healthcare_provider_plan', $this->form->columnsSelected))
+                            <flux:table.cell></flux:table.cell>
+                        @endif
+                        @if (in_array('client_housing_status', $this->form->columnsSelected))
+                            <flux:table.cell></flux:table.cell>
+                        @endif
+                        @if (in_array('client_income_category', $this->form->columnsSelected))
+                            <flux:table.cell>
+                                <flux:badge color="green"></flux:badge>
+                            </flux:table.cell>
+                        @endif
+                        @if (in_array('client_service_specialist', $this->form->columnsSelected))
+                            <flux:table.cell></flux:table.cell>
+                        @endif
+                        @if (in_array('code', $this->form->columnsSelected))
+                            <flux:table.cell></flux:table.cell>
+                        @endif
+                        @if (in_array('program_branch', $this->form->columnsSelected))
+                            <flux:table.cell></flux:table.cell>
+                        @endif
+                        @if (in_array('delivery_cost', $this->form->columnsSelected))
+                            <flux:table.cell> <strong>{{ Number::currency($result->total_delivery_cost) }}</strong> </flux:table.cell>
+                        @endif
+                        @if (in_array('food_cost', $this->form->columnsSelected))
+                            <flux:table.cell> <strong>{{ Number::currency($result->total_food_cost) }}</strong> </flux:table.cell>
+                        @endif
+                        @if (in_array('program_delivery_cost', $this->form->columnsSelected))
+                            <flux:table.cell> <strong>{{ Number::currency($result->total_program_delivery_cost) }}</strong> </flux:table.cell>
+                        @endif
+                        @if (in_array('termination_reason', $this->form->columnsSelected))
+                            <flux:table.cell></flux:table.cell>
+                        @endif
+                        @if (in_array('is_active', $this->form->columnsSelected))
+                            <flux:table.cell></flux:table.cell>
+                        @endif
+                        @if (in_array('recertification_date', $this->form->columnsSelected))
+                            <flux:table.cell></flux:table.cell>
+                        @endif
+                        @if (in_array('notes', $this->form->columnsSelected))
+                            <flux:table.cell></flux:table.cell>
+                        @endif
+                        <flux:table.cell></flux:table.cell>
+                    </flux:table.row>
+                @endif
             </flux:table.rows>
         </flux:table>
     </x-common.container-table>

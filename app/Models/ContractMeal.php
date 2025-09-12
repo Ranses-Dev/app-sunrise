@@ -40,9 +40,9 @@ class ContractMeal extends Model
             'client.city',
             'client.healthcareProvider',
             'client.healthcareProviderPlan',
+            'client.housingStatus',
             'client.howpaContracts',
             'client.contractMeals',
-            'client.housingStatus',
             'mealContractType',
             'clientServiceSpecialist',
             'deliveryCost',
@@ -82,7 +82,9 @@ class ContractMeal extends Model
         if (isset($filters['programBranchId']) && filled($filters['programBranchId'])) {
             $query->where('program_branch_id', $filters['programBranchId']);
         }
-        $query->addSelect('');
+        $query->withSum('deliveryCost as total_delivery_cost', 'cost')
+            ->withSum('foodCost as total_food_cost', 'cost')
+            ->withSum('programDeliveryCost as total_program_delivery_cost', 'cost');
         return $query;
     }
     public function client(): BelongsTo

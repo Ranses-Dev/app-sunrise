@@ -68,7 +68,7 @@ class Index extends Component
 
     public function export()
     {
-        $this->redirect(url: route('exports.contract-meals', ["filters" => $this->form->filters]));
+        $this->redirect(url: route('exports.contract-meals', ["filters" => $this->form->filters, "columns" => $this->form->columnsSelected]));
     }
     #[On('reset-filters')]
     public function resetFilters()

@@ -10,10 +10,11 @@ use Spatie\LaravelPdf\Facades\Pdf;
 use Spatie\LaravelPdf\Enums\Format;
 use \Spatie\LaravelPdf\Enums\Orientation;
 use Spatie\LaravelPdf\PdfBuilder;
+use App\Repositories\MealContractStatisticsRepositoryInterface as MealContractStatisticsRepository;
 
 class ContractMealExport extends Controller
 {
-    public function __construct(protected ContractMealRepository $repository) {}
+    public function __construct(protected ContractMealRepository $repository, protected MealContractStatisticsRepository $statisticsRepository) {}
     /**
      * Handle the incoming request.
      */
@@ -21,6 +22,8 @@ class ContractMealExport extends Controller
     {
 
         $data = $this->repository->getFiltered($request->input('filters', []))->get();
+        $columns = $request->input('columns') ?? [];
+        $stats = $this->statisticsRepository->getStatisticsForToday();
         return Pdf::format(Format::Letter)
             ->orientation(Orientation::Landscape)
             ->withBrowsershot(function (Browsershot $browsershot) {
@@ -32,7 +35,7 @@ class ContractMealExport extends Controller
             })
             ->margins(10, 10, 10, 10)
             ->download('contract_meals.pdf')
-            ->view('exports.pages.contract-meals', compact('data'))
+            ->view('exports.pages.contract-meals', compact('data', 'columns', 'stats'))
             ->footerView('exports.pages.footer');
     }
 }

@@ -71,7 +71,7 @@ class Index extends Component
 
     public function export()
     {
-        $this->redirect(route('exports.howpa-contracts', ["filters" => $this->form->filters]));
+        $this->redirect(route('exports.howpa-contracts', ["filters" => $this->form->filters,"columns" => $this->form->columnsSelected]));
     }
 
     public function show(int $id)

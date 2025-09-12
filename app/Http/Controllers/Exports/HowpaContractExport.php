@@ -23,6 +23,7 @@ class HowpaContractExport extends Controller
     {
 
         $data = $this->howpaContractRepository->getFiltered($request->input('filters')??[])->get();
+         $columns = $request->input('columns') ?? [];
         return Pdf::format(Format::Letter)
             ->orientation(Orientation::Landscape)
             ->withBrowsershot(function (Browsershot $browsershot) {
@@ -34,7 +35,7 @@ class HowpaContractExport extends Controller
             })
          ->margins(10, 10, 10, 10)
             ->download('howpa-contracts-list.pdf')
-            ->view('exports.pages.howpa-contracts', compact('data'))
+            ->view('exports.pages.howpa-contracts', compact('data','columns'))
             ->footerView('exports.pages.footer');
     }
 }

@@ -10,7 +10,7 @@ use Livewire\Attributes\Computed;
 
 class Stats extends Component
 {
-    protected $contractMealRepository;
+    protected ContractMealRepository $contractMealRepository;
     public function mount()
     {
         $this->contractMealRepository = app(ContractMealRepository::class);

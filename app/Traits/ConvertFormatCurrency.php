@@ -6,8 +6,9 @@ use Illuminate\Support\Number;
 
 trait ConvertFormatCurrency
 {
-    public function convertToCurrencyFormat(int|float|null $amount): string
+    public function convertToCurrencyFormat(int|float|null|string $amount): string
     {
-        return Number::currency(number: $amount ? ((float) $amount) : 0, in: Number::defaultCurrency(), locale: config('app.locale'), precision: 2);
+        $value = Number::parseFloat($amount);
+        return Number::currency(number: $value, in: Number::defaultCurrency(), locale: config('app.locale'), precision: 2);
     }
 }

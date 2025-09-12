@@ -9,14 +9,22 @@
         </div>
         <h3 class="text-xl font-bold mb-2 text-blue-800">Delivery Cost</h3>
         <ul class="text-blue-900 space-y-1">
-            <li><span class="font-semibold">Daily:</span> ${{ number_format($this->stats()['delivery_cost'] ?? 0, 2) }}
+            <li class="w-full flex justify-between gap-x-4">
+                <span class="font-semibold">Daily:</span>
+                <strong>{{ $this->stats()['delivery_cost'] ?? 0  }}</strong>
             </li>
-            <li><span class="font-semibold">Weekly:</span>
-                ${{ number_format($this->stats()['weekly_delivery_cost'] ?? 0, 2) }}</li>
-            <li><span class="font-semibold">Monthly:</span>
-                ${{ number_format($this->stats()['monthly_delivery_cost'] ?? 0, 2) }}</li>
-            <li><span class="font-semibold">Yearly:</span>
-                ${{ number_format($this->stats()['yearly_delivery_cost'] ?? 0, 2) }}</li>
+            <li class="w-full flex justify-between gap-x-4">
+                <span class="font-semibold">Weekly:</span>
+                <strong>{{  $this->stats()['weekly_delivery_cost'] ?? 0  }}</strong>
+            </li>
+            <li class="w-full flex justify-between gap-x-4">
+                <span class="font-semibold">Monthly:</span>
+                <strong>{{  $this->stats()['monthly_delivery_cost'] ?? 0 }}</strong>
+            </li>
+            <li class="w-full flex justify-between gap-x-4">
+                <span class="font-semibold">Yearly:</span>
+                <strong>{{  $this->stats()['yearly_delivery_cost'] ?? 0  }}</strong>
+            </li>
         </ul>
     </div>
     <!-- Card 2 -->
@@ -31,13 +39,21 @@
         </div>
         <h3 class="text-xl font-bold mb-2 text-green-800">Food Cost</h3>
         <ul class="text-green-900 space-y-1">
-            <li><span class="font-semibold">Daily:</span> ${{ number_format($this->stats()['food_cost'] ?? 0, 2) }}</li>
-            <li><span class="font-semibold">Weekly:</span>
-                ${{ number_format($this->stats()['weekly_food_cost'] ?? 0, 2) }}</li>
-            <li><span class="font-semibold">Monthly:</span>
-                ${{ number_format($this->stats()['monthly_food_cost'] ?? 0, 2) }}</li>
-            <li><span class="font-semibold">Yearly:</span>
-                ${{ number_format($this->stats()['yearly_food_cost'] ?? 0, 2) }}</li>
+            <li class="w-full flex justify-between gap-x-4">
+                <span class="font-semibold">Daily:</span>
+                <strong>{{ $this->stats()['food_cost'] ?? 0}}</strong>
+            </li>
+            <li class="w-full flex justify-between gap-x-4">
+                <span class="font-semibold">Weekly:</span>
+                <strong class="text-end"> {{ $this->stats()['weekly_food_cost'] ?? 0 }}</strong>
+            </li>
+            <li class="w-full flex justify-between gap-x-4">
+                <span class="font-semibold">Monthly:</span>
+                <strong>{{ $this->stats()['monthly_food_cost'] ?? 0 }}</strong>
+            </li>
+            <li class="w-full flex justify-between gap-x-4"><span class="font-semibold">Yearly:</span>
+                <strong>{{ $this->stats()['yearly_food_cost'] ?? 0 }}</strong>
+            </li>
         </ul>
     </div>
     <!-- Card 3 -->
@@ -50,14 +66,22 @@
         </div>
         <h3 class="text-xl font-bold mb-2 text-yellow-800">Program Delivery Cost</h3>
         <ul class="text-yellow-900 space-y-1">
-            <li><span class="font-semibold">Daily:</span>
-                ${{ number_format($this->stats()['program_delivery_cost'] ?? 0, 2) }}</li>
-            <li><span class="font-semibold">Weekly:</span>
-                ${{ number_format($this->stats()['weekly_program_delivery_cost'] ?? 0, 2) }}</li>
-            <li><span class="font-semibold">Monthly:</span>
-                ${{ number_format($this->stats()['monthly_program_delivery_cost'] ?? 0, 2) }}</li>
-            <li><span class="font-semibold">Yearly:</span>
-                ${{ number_format($this->stats()['yearly_program_delivery_cost'] ?? 0, 2) }}</li>
+            <li class="w-full flex justify-between gap-x-4">
+                <span class="font-semibold">Daily:</span>
+                <strong>{{ $this->stats()['program_delivery_cost'] ?? 0 }}</strong>
+            </li>
+            <li class="w-full flex justify-between gap-x-4">
+                <span class="font-semibold">Weekly:</span>
+                <strong>{{ $this->stats()['weekly_program_delivery_cost'] ?? 0 }}</strong>
+            </li>
+            <li class="w-full flex justify-between gap-x-4">
+                <span class="font-semibold">Monthly:</span>
+                <strong>{{ $this->stats()['monthly_program_delivery_cost'] ?? 0 }}</strong>
+            </li>
+            <li class="w-full flex justify-between gap-x-4">
+                <span class="font-semibold">Yearly:</span>
+                <strong>{{ $this->stats()['yearly_program_delivery_cost'] ?? 0 }}</strong>
+            </li>
         </ul>
     </div>
     <!-- Totals -->
@@ -69,18 +93,18 @@
             </svg>
         </div>
         <h3 class="text-xl font-bold mb-2 text-purple-800">Totals</h3>
-        <ul class="text-purple-900 space-y-1">
-            <li><span class="font-semibold">Daily:</span>
-                ${{ number_format(($this->stats()['delivery_cost'] ?? 0) + ($this->stats()['food_cost'] ?? 0) + ($this->stats()['program_delivery_cost'] ?? 0), 2) }}
+        <ul class="text-purple-900 space-y-2 ">
+            <li class="w-full flex justify-between gap-x-4"><span class="font-semibold">Daily:</span>
+                <strong>{{ ($this->stats()['daily_total'] ?? 0) }}</strong>
             </li>
-            <li><span class="font-semibold">Weekly:</span>
-                ${{ number_format(($this->stats()['weekly_delivery_cost'] ?? 0) + ($this->stats()['weekly_food_cost'] ?? 0) + ($this->stats()['weekly_program_delivery_cost'] ?? 0), 2) }}
+            <li class="w-full flex justify-between gap-x-4"><span class="font-semibold">Weekly:</span>
+                <strong>{{ ($this->stats()['weekly_total'] ?? 0) }}</strong>
             </li>
-            <li><span class="font-semibold">Monthly:</span>
-                ${{ number_format(($this->stats()['monthly_delivery_cost'] ?? 0) + ($this->stats()['monthly_food_cost'] ?? 0) + ($this->stats()['monthly_program_delivery_cost'] ?? 0), 2) }}
+            <li class="w-full flex justify-between gap-x-4"><span class="font-semibold">Monthly:</span>
+                <strong>{{ ($this->stats()['monthly_total'] ?? 0) }}</strong>
             </li>
-            <li><span class="font-semibold">Yearly:</span>
-                ${{ number_format(($this->stats()['yearly_delivery_cost'] ?? 0) + ($this->stats()['yearly_food_cost'] ?? 0) + ($this->stats()['yearly_program_delivery_cost'] ?? 0), 2) }}
+            <li class="w-full flex justify-between gap-x-4"><span class="font-semibold">Yearly:</span>
+                <strong>{{ ($this->stats()['yearly_total'] ?? 0) }}</strong>
             </li>
         </ul>
     </div>
